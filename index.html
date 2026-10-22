@@ -5987,12 +5987,20 @@ function kembaliDetailCalon() {
      HALAMAN CHECK IN CALON SISWA
 ================================================== -->
 
-<div id="halamanCheckIn" style="display:none; min-height:100vh; background:#f1f5f9; padding:24px 16px;">
-
-  <div style="max-width:1100px; margin:0 auto;">
-
-    <div style="background:#1d4ed8; color:white; padding:18px 22px; border-radius:16px; margin-bottom:20px;">
-      <h2 style="margin:0; font-size:22px;">📋 Check In Calon Siswa</h2>
+<div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <h2>
+          📋 Check In Calon Siswa
+        </h2>
+      </div>
+      <button
+        type="button"
+        onclick="kembaliDashboardAdmin()"
+        class="btn-logout"
+      >
+        ← Kembali
+      </button>
     </div>
 
     <!-- PENCARIAN -->
@@ -6022,14 +6030,6 @@ function kembaliDetailCalon() {
           ></div>
 
         </div>
-
-        <button
-          type="button"
-          onclick="kembaliDariCheckIn()"
-          style="padding:0 18px; border:0; border-radius:10px; background:#64748b; color:white; font-weight:bold; font-size:14px; cursor:pointer; white-space:nowrap;"
-        >
-          ← Kembali
-        </button>
 
       </div>
 
