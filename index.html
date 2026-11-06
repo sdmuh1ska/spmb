@@ -852,7 +852,14 @@
 
 #tombolKartuAkun {
   margin-top: 20px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#tombolKartuAkun button.btn-kwitansi {
+  background: #2563eb;
 }
 
 
@@ -4490,10 +4497,196 @@ function tampilkanKartuAkun(data) {
         🖨️ Cetak Kartu
       </button>
 
+      <button
+        type="button"
+        class="btn-kwitansi"
+        onclick="cetakKwitansi()"
+      >
+        🧾 Cetak Kwitansi
+      </button>
+
     </div>
 
   `;
 
+  // Simpan data kartu yang sedang tampil untuk kwitansi
+  window.dataKartuAktif = data;
+
+}
+
+/****************************************************
+ * CETAK KWITANSI PEMBAYARAN PENDAFTARAN
+ ****************************************************/
+
+function cetakKwitansi() {
+
+  const data = window.dataKartuAktif;
+
+  if (!data) {
+    alert('Data calon belum siap.');
+    return;
+  }
+
+  const namaBulan = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
+  const hariIni = new Date();
+
+  const tanggalTampil =
+    hariIni.getDate() + ' ' +
+    namaBulan[hariIni.getMonth()] + ' ' +
+    hariIni.getFullYear();
+
+  const jendela =
+    window.open('', '_blank', 'width=900,height=700');
+
+  if (!jendela) {
+    alert(
+      'Popup diblokir browser. ' +
+      'Silakan izinkan popup untuk aplikasi ini.'
+    );
+    return;
+  }
+
+  jendela.document.open();
+
+  jendela.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bukti Pembayaran Pendaftaran SPMB</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    color: #000;
+    background: #fff;
+  }
+
+  .kwitansi {
+    width: 100%;
+    max-width: 170mm;
+    margin: 0 auto;
+    padding: 10mm 0;
+  }
+
+  .judul {
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .judul .baris1 { font-size: 14pt; font-weight: bold; }
+  .judul .baris2 { font-size: 14pt; font-weight: bold; }
+  .judul .baris3 { font-size: 12pt; }
+
+  hr {
+    border: 0;
+    border-top: 2px solid #000;
+    margin: 12px 0 20px;
+  }
+
+  table.isi {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+  }
+
+  table.isi td {
+    padding: 5px 0;
+    vertical-align: top;
+  }
+
+  table.isi td.label { width: 48mm; }
+  table.isi td.titik { width: 6mm; }
+
+  .terbilang { font-style: italic; }
+
+  .ttd {
+    margin-top: 18mm;
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  .ttd .ruang { height: 22mm; }
+
+  .tombol {
+    text-align: center;
+    margin: 20px;
+  }
+
+  .tombol button {
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  @media print {
+    .tombol { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="kwitansi">
+
+  <div class="judul">
+    <div class="baris1">Bukti Pembayaran Pendaftaran SPMB</div>
+    <div class="baris2">SD Muhammadiyah 1 Ketelan Surakarta</div>
+    <div class="baris3">Tahun Pelajaran 2028/2029</div>
+  </div>
+
+  <hr>
+
+  <table class="isi">
+    <tr>
+      <td class="label">Nomor Pendaftaran</td>
+      <td class="titik">:</td>
+      <td>${escapeHtml(data.no || '')}</td>
+    </tr>
+    <tr>
+      <td class="label">Nama</td>
+      <td class="titik">:</td>
+      <td>${escapeHtml(data.nama || '')}</td>
+    </tr>
+    <tr>
+      <td class="label">Jumlah Pembayaran</td>
+      <td class="titik">:</td>
+      <td class="terbilang">Tiga Ratus Ribu Rupiah</td>
+    </tr>
+  </table>
+
+  <div class="ttd">
+    <div>Surakarta, ${tanggalTampil}</div>
+    <div>Bendahara</div>
+    <div class="ruang"></div>
+    <div>...............................</div>
+  </div>
+
+</div>
+
+<div class="tombol">
+  <button onclick="window.print()">🖨️ Cetak</button>
+</div>
+
+<script>
+  window.onload = function () {
+    setTimeout(function () { window.print(); }, 300);
+  };
+<\/script>
+
+</body>
+</html>
+  `);
+
+  jendela.document.close();
 }
 
 function cetakKartuAkun() {
