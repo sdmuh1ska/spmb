@@ -4527,18 +4527,22 @@ function cetakKwitansi() {
     return;
   }
 
-  const namaBulan = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ];
+  const tombol =
+    document.querySelector('#tombolKartuAkun .btn-kwitansi');
 
-  const hariIni = new Date();
+  if (tombol) {
+    tombol.disabled = true;
+    tombol.textContent = '⏳ Menyiapkan kwitansi...';
+  }
 
-  const tanggalTampil =
-    hariIni.getDate() + ' ' +
-    namaBulan[hariIni.getMonth()] + ' ' +
-    hariIni.getFullYear();
+  function pulihkanTombol() {
+    if (tombol) {
+      tombol.disabled = false;
+      tombol.textContent = '🧾 Cetak Kwitansi';
+    }
+  }
 
+  // Jendela dibuka lebih dulu (dalam klik pengguna) agar tidak diblokir popup
   const jendela =
     window.open('', '_blank', 'width=900,height=700');
 
@@ -4547,50 +4551,95 @@ function cetakKwitansi() {
       'Popup diblokir browser. ' +
       'Silakan izinkan popup untuk aplikasi ini.'
     );
+    pulihkanTombol();
     return;
   }
 
-  jendela.document.open();
+  muatAsetCetak(function(aset) {
 
-  jendela.document.write(`
+    const namaBulan = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    const hariIni = new Date();
+
+    const tanggalTampil =
+      hariIni.getDate() + ' ' +
+      namaBulan[hariIni.getMonth()] + ' ' +
+      hariIni.getFullYear();
+
+    function tagLogo(logo, alt) {
+      if (!logo || !logo.data) return '';
+      return '<img src="data:' + logo.mimeType + ';base64,' +
+             logo.data + '" alt="' + alt + '">';
+    }
+
+    jendela.document.open();
+
+    jendela.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Bukti Pembayaran Pendaftaran SPMB</title>
 <style>
-  @page { size: A4; margin: 20mm; }
+  @page { size: A4; margin: 10mm 15mm; }
 
   * { box-sizing: border-box; }
 
-  body {
+  html, body {
     margin: 0;
-    font-family: "Times New Roman", Times, serif;
-    font-size: 12pt;
-    color: #000;
+    padding: 0;
     background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 11pt;
   }
 
+  /* Satu kwitansi dibuat ringkas (±90 mm) agar satu lembar A4
+     muat untuk 3 kali cetak. */
   .kwitansi {
-    width: 100%;
-    max-width: 170mm;
+    width: 180mm;
     margin: 0 auto;
-    padding: 10mm 0;
+    padding-bottom: 5mm;
+    border-bottom: 1px dashed #777;
+  }
+
+  .kop {
+    display: grid;
+    grid-template-columns: 20mm 1fr 20mm;
+    align-items: center;
+    column-gap: 4mm;
+  }
+
+  .logo {
+    width: 18mm;
+    height: 18mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo img {
+    max-width: 18mm;
+    max-height: 18mm;
+    object-fit: contain;
   }
 
   .judul {
     text-align: center;
-    line-height: 1.5;
+    line-height: 1.3;
   }
 
-  .judul .baris1 { font-size: 14pt; font-weight: bold; }
-  .judul .baris2 { font-size: 14pt; font-weight: bold; }
-  .judul .baris3 { font-size: 12pt; }
+  .judul .b1 { font-size: 12pt; font-weight: bold; }
+  .judul .b2 { font-size: 12pt; font-weight: bold; }
+  .judul .b3 { font-size: 10.5pt; }
 
   hr {
     border: 0;
     border-top: 2px solid #000;
-    margin: 12px 0 20px;
+    margin: 3mm 0 4mm;
   }
 
   table.isi {
@@ -4600,22 +4649,22 @@ function cetakKwitansi() {
   }
 
   table.isi td {
-    padding: 5px 0;
+    padding: 1.2mm 0;
     vertical-align: top;
   }
 
-  table.isi td.label { width: 48mm; }
-  table.isi td.titik { width: 6mm; }
+  table.isi td.label { width: 42mm; }
+  table.isi td.titik { width: 5mm; }
 
-  .terbilang { font-style: italic; }
+  .miring { font-style: italic; }
 
   .ttd {
-    margin-top: 18mm;
+    margin-top: 3mm;
     text-align: right;
-    line-height: 1.5;
+    line-height: 1.35;
   }
 
-  .ttd .ruang { height: 22mm; }
+  .ttd .ruang { height: 13mm; }
 
   .tombol {
     text-align: center;
@@ -4637,10 +4686,18 @@ function cetakKwitansi() {
 
 <div class="kwitansi">
 
-  <div class="judul">
-    <div class="baris1">Bukti Pembayaran Pendaftaran SPMB</div>
-    <div class="baris2">SD Muhammadiyah 1 Ketelan Surakarta</div>
-    <div class="baris3">Tahun Pelajaran 2028/2029</div>
+  <div class="kop">
+
+    <div class="logo">${tagLogo(aset.logoKiri, 'Logo Kiri')}</div>
+
+    <div class="judul">
+      <div class="b1">Bukti Pembayaran Pendaftaran SPMB</div>
+      <div class="b2">SD Muhammadiyah 1 Ketelan Surakarta</div>
+      <div class="b3">Tahun Pelajaran 2028/2029</div>
+    </div>
+
+    <div class="logo">${tagLogo(aset.logoKanan, 'Logo Kanan')}</div>
+
   </div>
 
   <hr>
@@ -4652,14 +4709,19 @@ function cetakKwitansi() {
       <td>${escapeHtml(data.no || '')}</td>
     </tr>
     <tr>
-      <td class="label">Nama</td>
+      <td class="label">Nama Calon Siswa</td>
       <td class="titik">:</td>
       <td>${escapeHtml(data.nama || '')}</td>
     </tr>
     <tr>
-      <td class="label">Jumlah Pembayaran</td>
+      <td class="label">Uang Sejumlah</td>
       <td class="titik">:</td>
-      <td class="terbilang">Tiga Ratus Ribu Rupiah</td>
+      <td class="miring">Tiga Ratus Ribu Rupiah</td>
+    </tr>
+    <tr>
+      <td class="label">Untuk Pembayaran</td>
+      <td class="titik">:</td>
+      <td>Pendaftaran Siswa Baru</td>
     </tr>
   </table>
 
@@ -4678,15 +4740,29 @@ function cetakKwitansi() {
 
 <script>
   window.onload = function () {
-    setTimeout(function () { window.print(); }, 300);
+    setTimeout(function () { window.focus(); window.print(); }, 300);
   };
 <\/script>
 
 </body>
 </html>
-  `);
+    `);
 
-  jendela.document.close();
+    jendela.document.close();
+
+    pulihkanTombol();
+
+  }, function(error) {
+
+    console.error('Gagal memuat logo kwitansi:', error);
+
+    jendela.close();
+
+    alert('Logo tidak dapat dimuat. Periksa koneksi lalu coba lagi.');
+
+    pulihkanTombol();
+
+  });
 }
 
 function cetakKartuAkun() {
