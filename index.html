@@ -48,7 +48,7 @@
       height: 75px;
       margin: 0 auto 15px;
       border-radius: 50%;
-      background: #8B1E41;
+      background: #1d4ed8;
       color: white;
       display: flex;
       align-items: center;
@@ -96,7 +96,7 @@
     }
 
     input:focus {
-      border-color: #8B1E41;
+      border-color: #2563eb;
       box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
     }
 
@@ -115,7 +115,7 @@
       transform: translateY(-50%);
       border: none;
       background: transparent;
-      color: #8B1E41;
+      color: #2563eb;
       cursor: pointer;
       font-size: 13px;
       font-weight: bold;
@@ -126,7 +126,7 @@
       border: none;
       padding: 14px;
       border-radius: 10px;
-      background: #8B1E41;
+      background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);
       color: white;
       font-size: 16px;
       font-weight: bold;
@@ -136,11 +136,11 @@
     }
 
     .btn-login:hover {
-      background: #8B1E41;
+      filter: brightness(1.25);
     }
 
     .btn-login:disabled {
-      background: #93c5fd;
+      background: #b79ab0;
       cursor: not-allowed;
     }
 
@@ -171,7 +171,7 @@
       display: none;
       text-align: center;
       margin-top: 15px;
-      color: #8B1E41;
+      color: #2563eb;
       font-size: 14px;
     }
 
@@ -272,7 +272,8 @@
     }
 
     .dashboard-header {
-      background: #8B1E41;
+      background: radial-gradient(ellipse 60% 90% at 100% 0%, rgba(222, 180, 214, 0.38) 0%, rgba(222, 180, 214, 0) 62%), linear-gradient(135deg, #4a1a40 0%, #35102e 48%, #230520 100%);
+      background-color: #35102e;
       color: white;
       padding: 20px;
     }
@@ -403,7 +404,8 @@
 
 
 .admin-header {
-  background: #8B1E41;
+  background: radial-gradient(ellipse 60% 90% at 100% 0%, rgba(222, 180, 214, 0.38) 0%, rgba(222, 180, 214, 0) 62%), linear-gradient(135deg, #4a1a40 0%, #35102e 48%, #230520 100%);
+  background-color: #35102e;
   color: white;
   border-radius: 16px;
   padding: 22px 25px;
@@ -502,7 +504,7 @@
 .menu-admin button:hover {
   transform: translateY(-2px);
   box-shadow: 0 7px 18px rgba(0,0,0,0.08);
-  border-color: #93c5fd;
+  border-color: #b98aae;
 }
 
 
@@ -859,7 +861,7 @@
 }
 
 #tombolKartuAkun button.btn-kwitansi {
-  background: #8B1E41;
+  background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);
 }
 
 
@@ -946,7 +948,8 @@
   align-items: center;
   gap: 14px;
   padding: 20px 24px;
-  background: #8B1E41;
+  background: radial-gradient(ellipse 60% 90% at 100% 0%, rgba(222, 180, 214, 0.38) 0%, rgba(222, 180, 214, 0) 62%), linear-gradient(135deg, #4a1a40 0%, #35102e 48%, #230520 100%);
+  background-color: #35102e;
   color: #ffffff;
 }
 
@@ -1132,7 +1135,7 @@
 
 .ruang-kartu:hover:not(:disabled),
 .ruang-kartu:focus-visible {
-  border-color: #8B1E41;
+  border-color: #2563eb;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(37,99,235,0.15);
   outline: none;
@@ -1637,7 +1640,7 @@
           onclick="bukaDataPesertaDidikCalon()"
           style="
             border:none;
-            background:#8B1E41;
+            background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);
             color:white;
             padding:14px 22px;
             border-radius:10px;
@@ -1761,7 +1764,7 @@
             style="
               text-align:center;
               padding:25px;
-              color:#8B1E41;
+              color:#2563eb;
             "
           >
             ⏳ Memuat data peserta didik...
@@ -3746,7 +3749,7 @@ function tampilkanDataCalon(data) {
                 padding:7px 12px;
                 border:none;
                 border-radius:8px;
-                background:#8B1E41;
+                background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);
                 color:white;
                 cursor:pointer;
                 font-weight:bold;
@@ -4252,7 +4255,7 @@ function tampilkanDetailCalon(data) {
           padding:12px 20px;
           border:none;
           border-radius:10px;
-          background:#8B1E41;
+          background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);
           color:white;
           cursor:pointer;
           font-weight:bold;
@@ -5860,7 +5863,7 @@ function kembaliDetailCalon() {
               type="button"
               id="btnLunasiBayar"
               onclick="isiSisaBayar()"
-              style="padding:12px 16px; border:none; border-radius:10px; background:#e0f2fe; color:#075985; font-weight:bold; cursor:pointer; display:none;"
+              style="padding:12px 16px; border:none; border-radius:10px; background:#f3e4ef; color:#4a1a40; font-weight:bold; cursor:pointer; display:none;"
             >
               Isi sisa tagihan
             </button>
@@ -5912,7 +5915,7 @@ function kembaliDetailCalon() {
             type="button"
             id="btnCetakKwitansiBayar"
             onclick="cetakKwitansiBayar()"
-            style="display:none; padding:13px 20px; border:none; border-radius:10px; background:#8B1E41; color:white; font-weight:bold; font-size:15px; cursor:pointer;"
+            style="display:none; padding:13px 20px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; font-weight:bold; font-size:15px; cursor:pointer;"
           >
             🧾 Cetak Kwitansi
           </button>
@@ -6072,7 +6075,7 @@ function kembaliDetailCalon() {
           type="button"
           id="btnTambahGelombang"
           onclick="tambahBarisGelombang()"
-          style="padding:12px 18px; border:none; border-radius:10px; background:#e0f2fe; color:#075985; font-weight:bold; font-size:15px; cursor:pointer;"
+          style="padding:12px 18px; border:none; border-radius:10px; background:#f3e4ef; color:#4a1a40; font-weight:bold; font-size:15px; cursor:pointer;"
         >
           + Gelombang
         </button>
@@ -6263,7 +6266,7 @@ function kembaliDetailCalon() {
         <button
           type="button"
           onclick="muatSiswaKeluar()"
-          style="padding:12px 18px; border:none; border-radius:10px; background:#8B1E41; color:white; cursor:pointer; font-weight:bold;"
+          style="padding:12px 18px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; cursor:pointer; font-weight:bold;"
         >
           ↻ Muat Ulang
         </button>
@@ -6371,7 +6374,7 @@ function kembaliDetailCalon() {
         Total Keuangan SPMB 2028/2029
       </div>
 
-      <div id="lapTotal" style="margin-top:6px; font-size:36px; font-weight:800; color:#8B1E41;">
+      <div id="lapTotal" style="margin-top:6px; font-size:36px; font-weight:800; color:#1d4ed8;">
         Rp 0
       </div>
 
@@ -6385,7 +6388,7 @@ function kembaliDetailCalon() {
       <button
         type="button"
         onclick="muatLaporanKeuangan()"
-        style="padding:12px 20px; border:none; border-radius:10px; background:#8B1E41; color:white; cursor:pointer; font-weight:bold;"
+        style="padding:12px 20px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; cursor:pointer; font-weight:bold;"
       >
         ↻ Muat Ulang
       </button>
@@ -6466,7 +6469,7 @@ function kembaliDetailCalon() {
         <button
           type="button"
           onclick="muatDataBayar()"
-          style="padding:12px 18px; border:none; border-radius:10px; background:#8B1E41; color:white; cursor:pointer; font-weight:bold;"
+          style="padding:12px 18px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; cursor:pointer; font-weight:bold;"
         >
           ↻ Muat Ulang
         </button>
@@ -6582,7 +6585,7 @@ function kembaliDetailCalon() {
         </p>
 
         <div id="isiRuangObserver" class="ruang-grid">
-          <div style="grid-column:1/-1; text-align:center; padding:20px; color:#8B1E41;">
+          <div style="grid-column:1/-1; text-align:center; padding:20px; color:#2563eb;">
             ⏳ Memuat data ruang...
           </div>
         </div>
@@ -6608,7 +6611,7 @@ function kembaliDetailCalon() {
           <button
             type="button"
             onclick="muatDaftarObserver()"
-            style="padding:10px 16px; border:none; border-radius:10px; background:#8B1E41; color:white; font-weight:bold; cursor:pointer;"
+            style="padding:10px 16px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; font-weight:bold; cursor:pointer;"
           >
             ↻ Muat Ulang
           </button>
@@ -6987,7 +6990,7 @@ function kembaliDetailCalon() {
         <button
           type="button"
           onclick="muatDataObservasi()"
-          style="padding:12px 18px; border:none; border-radius:10px; background:#8B1E41; color:white; cursor:pointer; font-weight:bold;"
+          style="padding:12px 18px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; cursor:pointer; font-weight:bold;"
         >
           ↻ Muat Ulang
         </button>
@@ -7154,7 +7157,7 @@ function kembaliDetailCalon() {
           type="button"
           id="btnMuatHasilAdmin"
           onclick="muatHasilAdmin()"
-          style="padding:12px 18px; border:none; border-radius:10px; background:#8B1E41; color:white; cursor:pointer; font-weight:bold; font-family:inherit;"
+          style="padding:12px 18px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; cursor:pointer; font-weight:bold; font-family:inherit;"
         >
           ↻ Muat Ulang
         </button>
@@ -7235,7 +7238,7 @@ function kembaliDetailCalon() {
     <form id="formPengaturan" onsubmit="simpanPengaturanForm(event)" novalidate>
 
       <div id="isiFormPengaturan">
-        <div class="welcome-card" style="text-align:center;color:#8B1E41;">
+        <div class="welcome-card" style="text-align:center;color:#2563eb;">
           ⏳ Memuat pengaturan...
         </div>
       </div>
@@ -7338,7 +7341,7 @@ function kembaliDetailCalon() {
         <button
           type="button"
           onclick="muatDataCheckIn()"
-          style="padding:10px 15px; border:0; border-radius:8px; background:#8B1E41; color:white; font-weight:bold; cursor:pointer;"
+          style="padding:10px 15px; border:0; border-radius:8px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; font-weight:bold; cursor:pointer;"
         >
           ↻ Muat Ulang
         </button>
@@ -8673,7 +8676,7 @@ function tampilkanDataObservasi(daftar) {
           <button
             type="button"
             onclick="bukaDetailObservasi('${escapeHtml(item.idObs)}')"
-            style="padding:7px 12px;border:none;border-radius:8px;background:#8B1E41;color:white;cursor:pointer;font-weight:bold;"
+            style="padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);color:white;cursor:pointer;font-weight:bold;"
           >
             Detail
           </button>
@@ -8871,7 +8874,7 @@ function muatPengaturan(pertahankanPesan) {
 
   if (area && !pertahankanPesan) {
     area.innerHTML = `
-      <div class="welcome-card" style="text-align:center;color:#8B1E41;">
+      <div class="welcome-card" style="text-align:center;color:#2563eb;">
         ⏳ Memuat pengaturan...
       </div>`;
   }
@@ -9482,7 +9485,7 @@ function renderRuangObserver() {
 
   if (st.memuat && !st.daftar.length) {
     area.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:20px;color:#8B1E41;">
+      <div style="grid-column:1/-1;text-align:center;padding:20px;color:#2563eb;">
         ⏳ Memuat data ruang...
       </div>`;
     return;
@@ -9621,7 +9624,7 @@ function renderDaftarObserver() {
         <button
           type="button"
           onclick="pilihCalonObserver('${escapeHtml(c.idCalon)}')"
-          style="padding:8px 14px;border:none;border-radius:8px;background:#8B1E41;color:white;cursor:pointer;font-weight:bold;font-family:inherit;"
+          style="padding:8px 14px;border:none;border-radius:8px;background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);color:white;cursor:pointer;font-weight:bold;font-family:inherit;"
         >
           ${c.status === 'KESEMPATAN_2' ? 'Observasi ke-2' : 'Observasi'}
         </button>`;
@@ -11149,7 +11152,7 @@ function tampilkanTabelTidakJadi() {
       '<td style="' + sel + '">' + escapeHtml(c.waktu || '-') + '</td>' +
       '<td style="' + sel + '">' +
         '<button type="button" onclick="kembalikanTidakJadi(\'' + escapeHtml(c.idCalon) + '\')" ' +
-        'style="padding:7px 12px;border:none;border-radius:8px;background:#8B1E41;color:white;cursor:pointer;font-weight:bold;">' +
+        'style="padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);color:white;cursor:pointer;font-weight:bold;">' +
         'Kembalikan</button>' +
       '</td>' +
     '</tr>';
@@ -11470,7 +11473,7 @@ function tampilkanTabelSiswaKeluar() {
       '<td style="' + sel + '">' + escapeHtml(c.waktu || '-') + '</td>' +
       '<td style="' + sel + '">' +
         '<button type="button" onclick="bukaRiwayatBayar(\'' + escapeHtml(c.idCalon) + '\')" ' +
-        'style="padding:7px 12px;border:none;border-radius:8px;background:#8B1E41;color:white;cursor:pointer;font-weight:bold;">' +
+        'style="padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);color:white;cursor:pointer;font-weight:bold;">' +
         'Riwayat</button>' +
       '</td>' +
     '</tr>';
@@ -12246,7 +12249,7 @@ function tampilkanTabelBayar(daftar) {
       '<td style="' + sel + '">' + escapeHtml(c.terakhir ? formatTanggalBayar(c.terakhir) : '-') + '</td>' +
       '<td style="' + sel + '">' +
         '<button type="button" onclick="bukaRiwayatBayar(\'' + escapeHtml(c.idCalon) + '\')" ' +
-        'style="padding:7px 12px;border:none;border-radius:8px;background:#8B1E41;color:white;cursor:pointer;font-weight:bold;">' +
+        'style="padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);color:white;cursor:pointer;font-weight:bold;">' +
         'Riwayat</button>' +
       '</td>' +
     '</tr>';
