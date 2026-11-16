@@ -1868,6 +1868,7 @@
       getDataPembayaran:      ['getDataPembayaran', ['idPetugas']],
       getDaftarTidakJadiDaftar: ['getDaftarTidakJadiDaftar', ['idPetugas']],
       getDataSiswaKeluar: ['getDataSiswaKeluar', ['idPetugas']],
+      getLaporanKeuangan: ['getLaporanKeuangan', ['idPetugas']],
       getAsetCetak:           ['getAsetCetak',
                                ['urlQr', 'idLogoKiri', 'idLogoKanan', 'idTtdKepala']]
     };
@@ -5784,6 +5785,10 @@ function kembaliDetailCalon() {
         🚪 Siswa Keluar / Tidak Jadi Daftar
       </button>
 
+      <button type="button" onclick="bukaLaporanKeuangan()">
+        📊 Laporan Keuangan
+      </button>
+
       <button type="button" onclick="bukaBayarData()">
         📋 Data Pembayaran Daftar Ulang
       </button>
@@ -6315,6 +6320,83 @@ function kembaliDetailCalon() {
 
 
 <!-- =================================================
+     LAPORAN KEUANGAN (BENDAHARA & ADMIN)
+================================================== -->
+
+<div id="halamanLaporanKeuangan" style="display:none; min-height:100vh; background:#f1f5f9;">
+
+  <div class="admin-container">
+
+    <div class="admin-header">
+
+      <div>
+        <h2>📊 Laporan Keuangan</h2>
+        <p>SPMB Tahun Pelajaran 2028/2029</p>
+      </div>
+
+      <button type="button" onclick="kembaliDariLaporanKeuangan()" class="btn-logout">
+        ← Kembali
+      </button>
+
+    </div>
+
+    <div
+      id="pesanLaporanKeuangan"
+      role="status"
+      aria-live="polite"
+      style="display:none; margin-bottom:16px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"
+    ></div>
+
+    <div class="statistik-grid" style="grid-template-columns:repeat(2, minmax(0, 1fr));">
+
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-label">Jumlah Biaya Pendaftaran</div>
+        <div id="lapBiayaPendaftaran" class="stat-number" style="color:#1e3a8a;font-size:28px;">Rp 0</div>
+        <div id="lapDeskPendaftaran" style="margin-top:8px;font-size:13px;color:#64748b;line-height:1.5;"></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🧾</div>
+        <div class="stat-label">Jumlah Biaya Daftar Ulang</div>
+        <div id="lapBiayaDaftarUlang" class="stat-number" style="color:#166534;font-size:28px;">Rp 0</div>
+        <div id="lapDeskDaftarUlang" style="margin-top:8px;font-size:13px;color:#64748b;line-height:1.5;"></div>
+      </div>
+
+    </div>
+
+    <div class="welcome-card" style="text-align:center; border:2px solid #bfdbfe; background:#eff6ff;">
+
+      <div style="font-size:15px; color:#1e3a8a; font-weight:700;">
+        Total Keuangan SPMB 2028/2029
+      </div>
+
+      <div id="lapTotal" style="margin-top:6px; font-size:36px; font-weight:800; color:#1d4ed8;">
+        Rp 0
+      </div>
+
+      <div style="margin-top:6px; font-size:13px; color:#64748b;">
+        Biaya Pendaftaran + Biaya Daftar Ulang
+      </div>
+
+    </div>
+
+    <div style="text-align:center; margin-top:8px;">
+      <button
+        type="button"
+        onclick="muatLaporanKeuangan()"
+        style="padding:12px 20px; border:none; border-radius:10px; background:#2563eb; color:white; cursor:pointer; font-weight:bold;"
+      >
+        ↻ Muat Ulang
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =================================================
      BENDAHARA: DATA PEMBAYARAN
 ================================================== -->
 
@@ -6790,6 +6872,14 @@ function kembaliDetailCalon() {
         onclick="bukaTidakJadiDaftar()"
       >
         🚫 Tidak Jadi Daftar
+      </button>
+
+
+      <button
+        type="button"
+        onclick="bukaLaporanKeuangan()"
+      >
+        📊 Laporan Keuangan
       </button>
 
 
@@ -10120,6 +10210,7 @@ const HALAMAN_BENDAHARA = [
   'halamanGelombangSetting',
   'halamanGelombangCalon',
   'halamanSiswaKeluar',
+  'halamanLaporanKeuangan',
   'halamanBayarData'
 ];
 
@@ -11166,6 +11257,95 @@ function kembalikanTidakJadi(idCalon) {
     '',
     'Mengembalikan calon...'
   );
+}
+
+
+/* =====================================================
+   LAPORAN KEUANGAN (BENDAHARA & ADMIN)
+===================================================== */
+
+window.laporanKeuangan = { memuat: false };
+
+
+function bukaLaporanKeuangan() {
+  const st = window.bendaharaState;
+  const level = window.userLogin
+    ? String(window.userLogin.level || '').trim().toUpperCase()
+    : '';
+
+  // Admin masuk dari dashboard admin, bendahara dari dashboard bendahara
+  if (level === 'ADMIN') {
+    const da = document.getElementById('dashboardAdmin');
+    if (da) da.style.display = 'none';
+    st.dariAdmin = true;
+  } else {
+    st.dariAdmin = false;
+  }
+
+  tampilkanHalamanBendahara('halamanLaporanKeuangan');
+  tampilkanKotakPesan('pesanLaporanKeuangan', '', '');
+  muatLaporanKeuangan();
+}
+
+
+function kembaliDariLaporanKeuangan() {
+  kembaliDariBayarData();
+}
+
+
+function muatLaporanKeuangan() {
+  const lk = window.laporanKeuangan;
+  if (!window.userLogin || lk.memuat) return;
+
+  lk.memuat = true;
+  tampilkanKotakPesan('pesanLaporanKeuangan', '⏳ Memuat laporan keuangan...', 'info');
+
+  google.script.run
+    .withSuccessHandler(function(hasil) {
+      lk.memuat = false;
+
+      if (!hasil || !hasil.success) {
+        tampilkanKotakPesan(
+          'pesanLaporanKeuangan',
+          hasil && hasil.message ? hasil.message : 'Laporan keuangan tidak dapat dibaca.',
+          'error'
+        );
+        return;
+      }
+
+      tampilkanKotakPesan('pesanLaporanKeuangan', '', '');
+
+      const set = function(id, teks) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = teks;
+      };
+
+      set('lapBiayaPendaftaran', formatRupiah(hasil.biayaPendaftaran));
+      set(
+        'lapDeskPendaftaran',
+        hasil.jumlahCheckIn + ' siswa sudah check in × ' + formatRupiah(hasil.biayaPerSiswa) + ' per siswa'
+      );
+
+      set('lapBiayaDaftarUlang', formatRupiah(hasil.biayaDaftarUlang));
+
+      let desk = hasil.jumlahPembayar + ' siswa sudah melakukan daftar ulang';
+      if (hasil.jumlahKeluarBayar > 0) {
+        desk += ' (termasuk ' + formatRupiah(hasil.nominalKeluarBayar) + ' dari ' +
+          hasil.jumlahKeluarBayar + ' siswa tidak jadi daftar)';
+      }
+      set('lapDeskDaftarUlang', desk);
+
+      set('lapTotal', formatRupiah(hasil.total));
+    })
+    .withFailureHandler(function(error) {
+      lk.memuat = false;
+      tampilkanKotakPesan(
+        'pesanLaporanKeuangan',
+        'Gagal memuat laporan keuangan. ' + (error && error.message ? error.message : ''),
+        'error'
+      );
+    })
+    .getLaporanKeuangan(window.userLogin.id);
 }
 
 
