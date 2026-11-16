@@ -7337,7 +7337,7 @@ function kembaliDetailCalon() {
               <th style="padding:11px;">Nama</th>
               <th style="padding:11px;">Asal TK</th>
               <th style="padding:11px;">Keterangan</th>
-              <th style="padding:11px;">Data Tersimpan</th>
+              <th style="padding:11px; text-align:right;">Biaya yang Sudah Dibayar</th>
               <th style="padding:11px;">Tanggal</th>
               <th style="padding:11px;">Aksi</th>
             </tr>
@@ -10981,6 +10981,16 @@ function tampilkanKartuTidakJadi(calon) {
 }
 
 
+/* "Sudah check in dan observasi" / "Belum check in dan observasi" / dst. */
+function keteranganOtomatisTidakJadi(c) {
+  if (c.sudahCheckIn && c.sudahObservasi) return 'Sudah check in dan observasi';
+  if (!c.sudahCheckIn && !c.sudahObservasi) return 'Belum check in dan observasi';
+  return c.sudahCheckIn
+    ? 'Sudah check in, belum observasi'
+    : 'Sudah observasi, belum check in';
+}
+
+
 function tampilkanTabelTidakJadi() {
   const tbody = document.getElementById('bodyTidakJadi');
   const ringkas = document.getElementById('ringkasTidakJadi');
@@ -11003,8 +11013,10 @@ function tampilkanTabelTidakJadi() {
       '<td style="' + sel + '">' + escapeHtml(c.no) + '</td>' +
       '<td style="' + sel + '"><strong>' + escapeHtml(c.nama) + '</strong></td>' +
       '<td style="' + sel + '">' + escapeHtml(c.asalTk) + '</td>' +
-      '<td style="' + sel + '">' + escapeHtml(c.keterangan || '-') + '</td>' +
-      '<td style="' + sel + '">' + escapeHtml((c.catatan || []).join(', ') || '-') + '</td>' +
+      '<td style="' + sel + '">' + escapeHtml(keteranganOtomatisTidakJadi(c)) +
+        (c.keterangan ? '<div style="font-size:12px;color:#64748b;margin-top:2px;">' + escapeHtml(c.keterangan) + '</div>' : '') +
+      '</td>' +
+      '<td style="' + sel + '" class="angka-kanan"><strong>' + formatRupiah(c.terbayar) + '</strong></td>' +
       '<td style="' + sel + '">' + escapeHtml(c.waktu || '-') + '</td>' +
       '<td style="' + sel + '">' +
         '<button type="button" onclick="kembalikanTidakJadi(\'' + escapeHtml(c.idCalon) + '\')" ' +
