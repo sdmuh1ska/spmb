@@ -403,7 +403,7 @@
 
 
 .admin-header {
-  background: #3F2A47;
+  background: #1d4ed8;
   color: white;
   border-radius: 16px;
   padding: 22px 25px;
@@ -1866,6 +1866,8 @@
       getPengaturanGelombang: ['getPengaturanGelombang', ['idPetugas']],
       getDataGelombangCalon: ['getDataGelombangCalon', ['idPetugas']],
       getDataPembayaran:      ['getDataPembayaran', ['idPetugas']],
+      getDaftarTidakJadiDaftar: ['getDaftarTidakJadiDaftar', ['idPetugas']],
+      getDataSiswaKeluar: ['getDataSiswaKeluar', ['idPetugas']],
       getAsetCetak:           ['getAsetCetak',
                                ['urlQr', 'idLogoKiri', 'idLogoKanan', 'idTtdKepala']]
     };
@@ -1878,6 +1880,8 @@
       generateAkunPeserta: 'generateAkunPeserta',
       simpanPembayaran:    'simpanPembayaran',
       simpanPotongan:      'simpanPotongan',
+      tandaiTidakJadiDaftar: 'tandaiTidakJadiDaftar',
+      batalkanTidakJadiDaftar: 'batalkanTidakJadiDaftar',
       simpanPengaturanGelombang: 'simpanPengaturanGelombang',
       simpanGelombangCalon: 'simpanGelombangCalon'
     };
@@ -2385,7 +2389,7 @@ function logout() {
   }
 
 
-  ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanHasilAdmin']
+  ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanHasilAdmin','halamanTidakJadi']
     .forEach(function(id) {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
@@ -5776,6 +5780,10 @@ function kembaliDetailCalon() {
         🗂️ Input Gelombang Calon Siswa
       </button>
 
+      <button type="button" onclick="bukaSiswaKeluar()">
+        🚪 Siswa Keluar / Tidak Jadi Daftar
+      </button>
+
       <button type="button" onclick="bukaBayarData()">
         📋 Data Pembayaran Daftar Ulang
       </button>
@@ -6179,6 +6187,121 @@ function kembaliDetailCalon() {
               </td>
             </tr>
           </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =================================================
+     BENDAHARA: SISWA KELUAR / TIDAK JADI DAFTAR
+================================================== -->
+
+<div id="halamanSiswaKeluar" style="display:none; min-height:100vh; background:#f1f5f9;">
+
+  <div class="admin-container">
+
+    <div class="admin-header">
+
+      <div>
+        <h2>🚪 Siswa Keluar / Tidak Jadi Daftar</h2>
+        <p id="ringkasSiswaKeluar">Memuat data...</p>
+      </div>
+
+      <button type="button" onclick="kembaliKeDashboardBendahara()" class="btn-logout">
+        ← Kembali
+      </button>
+
+    </div>
+
+    <div class="statistik-grid tiga">
+
+      <div class="stat-card">
+        <div class="stat-icon">🚪</div>
+        <div class="stat-label">Siswa Keluar / Tidak Jadi Daftar</div>
+        <div id="statKeluarJumlah" class="stat-number" style="color:#1e3a8a;">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🧾</div>
+        <div class="stat-label">Pernah Membayar</div>
+        <div id="statKeluarBayar" class="stat-number" style="color:#92400e;">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Total Biaya yang Pernah Dibayarkan</div>
+        <div id="statKeluarTotal" class="stat-number" style="color:#166534;font-size:28px;">Rp 0</div>
+      </div>
+
+    </div>
+
+    <div class="welcome-card">
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+        <input
+          type="text"
+          id="pencarianSiswaKeluar"
+          placeholder="Cari nomor, nama, atau asal TK..."
+          autocomplete="off"
+          style="flex:1; min-width:240px;"
+          oninput="tampilkanTabelSiswaKeluar()"
+        >
+
+        <button
+          type="button"
+          onclick="muatSiswaKeluar()"
+          style="padding:12px 18px; border:none; border-radius:10px; background:#2563eb; color:white; cursor:pointer; font-weight:bold;"
+        >
+          ↻ Muat Ulang
+        </button>
+
+      </div>
+
+      <div
+        id="pesanSiswaKeluar"
+        role="status"
+        aria-live="polite"
+        style="display:none; margin-top:14px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"
+      ></div>
+
+    </div>
+
+    <div class="welcome-card">
+
+      <div style="overflow-x:auto;">
+
+        <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:860px;">
+
+          <thead>
+            <tr style="background:#eff6ff; color:#1e3a8a;">
+              <th style="padding:12px; text-align:left;">No</th>
+              <th style="padding:12px; text-align:left;">Nama</th>
+              <th style="padding:12px; text-align:left;">Asal TK</th>
+              <th style="padding:12px; text-align:left;">Gelombang</th>
+              <th style="padding:12px; text-align:right;">Biaya yang Dibayarkan</th>
+              <th style="padding:12px; text-align:left;">Keterangan</th>
+              <th style="padding:12px; text-align:left;">Tanggal Keluar</th>
+              <th style="padding:12px; text-align:left;">Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody id="bodySiswaKeluar">
+            <tr>
+              <td colspan="8" style="padding:20px; text-align:center;">
+                ⏳ Memuat data...
+              </td>
+            </tr>
+          </tbody>
+
+          <tfoot id="footSiswaKeluar"></tfoot>
 
         </table>
 
@@ -6637,6 +6760,14 @@ function kembaliDetailCalon() {
         onclick="bukaBayarDataAdmin()"
       >
         💰 Data Pembayaran Daftar Ulang
+      </button>
+
+
+      <button
+        type="button"
+        onclick="bukaTidakJadiDaftar()"
+      >
+        🚫 Tidak Jadi Daftar
       </button>
 
 
@@ -7124,6 +7255,95 @@ function kembaliDetailCalon() {
                 Memuat data...
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- =================================================
+     HALAMAN TIDAK JADI DAFTAR (ADMIN)
+================================================== -->
+
+<div id="halamanTidakJadi" style="display:none; min-height:100vh; background:#f1f5f9; padding:24px 16px;">
+
+  <div style="max-width:1100px; margin:0 auto;">
+
+    <div class="admin-header">
+      <div>
+        <h2>🚫 Tidak Jadi Daftar</h2>
+        <p>Siswa yang menyatakan keluar dipindahkan ke daftar ini</p>
+      </div>
+      <button type="button" onclick="kembaliDariTidakJadi()" class="btn-logout">
+        ← Kembali
+      </button>
+    </div>
+
+    <div style="background:white; padding:22px; border-radius:14px; border:1px solid #e5e7eb; margin-bottom:20px;">
+
+      <label for="cariTidakJadi">Cari nomor urut atau nama calon siswa</label>
+
+      <div style="display:flex; gap:10px; align-items:stretch; flex-wrap:wrap;">
+
+        <div id="wadahCariTidakJadi" style="position:relative; flex:1 1 260px; max-width:440px;">
+
+          <input
+            type="text"
+            id="cariTidakJadi"
+            placeholder="Ketik nomor urut atau nama..."
+            autocomplete="off"
+            role="combobox"
+            aria-expanded="false"
+            aria-controls="dropdownTidakJadi"
+            aria-autocomplete="list"
+          >
+
+          <div
+            id="dropdownTidakJadi"
+            role="listbox"
+            style="display:none; position:absolute; left:0; right:0; top:100%; margin-top:6px; background:white; border:1px solid #cbd5e1; border-radius:10px; box-shadow:0 10px 25px rgba(15,23,42,0.15); max-height:320px; overflow-y:auto; z-index:50;"
+          ></div>
+
+        </div>
+
+      </div>
+
+      <p style="margin:12px 0 0; font-size:13px; color:#64748b;">
+        Calon yang dipindahkan tidak lagi tampil di daftar daftar ulang, tetapi
+        seluruh datanya (check in, pendaftaran, observasi, daftar ulang, keuangan)
+        tetap tersimpan.
+      </p>
+
+      <div id="pesanTidakJadi" role="status" aria-live="polite" style="display:none; margin-top:15px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"></div>
+
+    </div>
+
+    <div id="kartuTidakJadi" style="display:none; background:white; padding:22px; border-radius:14px; border:1px solid #e5e7eb; margin-bottom:20px;"></div>
+
+    <div style="background:white; padding:22px; border-radius:14px; border:1px solid #e5e7eb;">
+
+      <h3 style="margin:0 0 4px; color:#1e3a8a;">Daftar Siswa Tidak Jadi Daftar</h3>
+      <p id="ringkasTidakJadi" style="margin:0 0 12px; color:#64748b; font-size:13px;">Memuat data...</p>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px; min-width:760px;">
+          <thead>
+            <tr style="background:#eff6ff; color:#1e3a8a; text-align:left;">
+              <th style="padding:11px;">No</th>
+              <th style="padding:11px;">Nama</th>
+              <th style="padding:11px;">Asal TK</th>
+              <th style="padding:11px;">Keterangan</th>
+              <th style="padding:11px;">Data Tersimpan</th>
+              <th style="padding:11px;">Tanggal</th>
+              <th style="padding:11px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="bodyTidakJadi">
+            <tr><td colspan="7" style="padding:16px;color:#64748b;">Memuat data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -9877,6 +10097,7 @@ const HALAMAN_BENDAHARA = [
   'halamanPotongan',
   'halamanGelombangSetting',
   'halamanGelombangCalon',
+  'halamanSiswaKeluar',
   'halamanBayarData'
 ];
 
@@ -9961,6 +10182,7 @@ function resetDashboardBendahara() {
   st.tanpaGelombang = 0;
   window.gelombangState = { daftar: [], pilihan: [], memuat: false, menyimpan: false };
   window.gelombangCalon = { gelombang: [], data: [], asli: {}, ubah: {}, memuat: false, menyimpan: false };
+  window.siswaKeluar = { data: [], total: 0, memuat: false };
   st.terakhir = null;
   st.memuat = false;
   st.menyimpan = false;
@@ -10433,6 +10655,607 @@ function simpanBayar(event) {
       tanggal: tanggal,
       keterangan: keterangan
     });
+}
+
+
+/* =====================================================
+   TIDAK JADI DAFTAR (ADMIN)
+===================================================== */
+
+window.tidakJadi = {
+  data: [],
+  hasil: [],
+  aktif: -1,
+  terpilih: null,
+  siap: false,
+  menghapus: false,
+  eventTerpasang: false
+};
+
+
+function bukaTidakJadiDaftar() {
+  if (!adminCheckInValid()) {
+    alert('Halaman ini hanya dapat dibuka oleh admin.');
+    return;
+  }
+
+  const da = document.getElementById('dashboardAdmin');
+  if (da) da.style.display = 'none';
+
+  const halaman = document.getElementById('halamanTidakJadi');
+  if (halaman) halaman.style.display = 'block';
+
+  const input = document.getElementById('cariTidakJadi');
+  if (input) input.value = '';
+
+  tutupDropdownTidakJadi();
+  tampilkanKartuTidakJadi(null);
+  tampilkanKotakPesan('pesanTidakJadi', '', '');
+  pasangEventTidakJadi();
+  muatDaftarTidakJadi();
+
+  if (input) setTimeout(function() { input.focus(); }, 50);
+}
+
+
+function kembaliDariTidakJadi() {
+  tutupDropdownTidakJadi();
+
+  const halaman = document.getElementById('halamanTidakJadi');
+  const da = document.getElementById('dashboardAdmin');
+
+  if (halaman) halaman.style.display = 'none';
+  if (da) da.style.display = 'block';
+
+  muatStatistikAdmin();
+}
+
+
+function muatDaftarTidakJadi(pesanSesudah) {
+  const t = window.tidakJadi;
+  const input = document.getElementById('cariTidakJadi');
+
+  t.siap = false;
+  if (input) input.placeholder = 'Memuat data calon siswa...';
+
+  google.script.run
+    .withSuccessHandler(function(hasil) {
+      if (!hasil || !hasil.success) {
+        if (input) input.placeholder = 'Data calon gagal dimuat';
+        tampilkanKotakPesan(
+          'pesanTidakJadi',
+          hasil && hasil.message ? hasil.message : 'Data calon tidak dapat dibaca.',
+          'error'
+        );
+        return;
+      }
+
+      t.data = hasil.data || [];
+      t.siap = true;
+
+      tampilkanTabelTidakJadi();
+
+      if (input) input.placeholder = 'Ketik nomor urut atau nama...';
+
+      if (pesanSesudah) tampilkanKotakPesan('pesanTidakJadi', pesanSesudah, 'success');
+
+      if (input && input.value.trim()) perbaruiDropdownTidakJadi();
+    })
+    .withFailureHandler(function(error) {
+      if (input) input.placeholder = 'Data calon gagal dimuat';
+      tampilkanKotakPesan(
+        'pesanTidakJadi',
+        'Gagal memuat data calon. ' + (error && error.message ? error.message : ''),
+        'error'
+      );
+    })
+    .getDaftarTidakJadiDaftar(window.userLogin.id);
+}
+
+
+function pasangEventTidakJadi() {
+  const t = window.tidakJadi;
+  if (t.eventTerpasang) return;
+
+  const input = document.getElementById('cariTidakJadi');
+  const dropdown = document.getElementById('dropdownTidakJadi');
+  if (!input || !dropdown) return;
+
+  input.addEventListener('input', perbaruiDropdownTidakJadi);
+  input.addEventListener('focus', perbaruiDropdownTidakJadi);
+
+  input.addEventListener('keydown', function(e) {
+    const jumlah = t.hasil.length;
+    const terbuka = dropdown.style.display !== 'none';
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!terbuka) { perbaruiDropdownTidakJadi(); return; }
+      if (jumlah) setAktifTidakJadi((t.aktif + 1) % jumlah, true);
+
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (jumlah) setAktifTidakJadi((t.aktif - 1 + jumlah) % jumlah, true);
+
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const calon = t.hasil[t.aktif >= 0 ? t.aktif : 0];
+      if (terbuka && calon) pilihCalonTidakJadi(calon.idCalon);
+
+    } else if (e.key === 'Escape') {
+      tutupDropdownTidakJadi();
+    }
+  });
+
+  dropdown.addEventListener('mousedown', function(e) {
+    const item = e.target.closest('[data-id]');
+    if (!item) return;
+    e.preventDefault();
+    pilihCalonTidakJadi(item.getAttribute('data-id'));
+  });
+
+  dropdown.addEventListener('mouseover', function(e) {
+    const item = e.target.closest('[data-index]');
+    if (item) setAktifTidakJadi(Number(item.getAttribute('data-index')), false);
+  });
+
+  document.addEventListener('mousedown', function(e) {
+    const wadah = document.getElementById('wadahCariTidakJadi');
+    if (wadah && !wadah.contains(e.target)) tutupDropdownTidakJadi();
+  });
+
+  t.eventTerpasang = true;
+}
+
+
+function cocokkanCalonTidakJadi(kata) {
+  const q = String(kata || '').trim().toLowerCase();
+  if (!q) return [];
+
+  const angka = /^\d+$/.test(q);
+  const cocok = [];
+
+  window.tidakJadi.data.forEach(function(calon) {
+    if (calon.tidakJadi) return;
+
+    const nama = String(calon.nama || '').toLowerCase();
+    const no = String(calon.no || '').trim().toLowerCase();
+    const id = String(calon.idCalon || '').toLowerCase();
+
+    let skor = -1;
+
+    if (angka && no !== '' && Number(no) === Number(q)) skor = 0;
+    else if (angka && no.startsWith(q)) skor = 1;
+    else if (nama.startsWith(q)) skor = 2;
+    else if (nama.split(/\s+/).some(function(k) { return k.startsWith(q); })) skor = 3;
+    else if (nama.includes(q)) skor = 4;
+    else if (!angka && id.includes(q)) skor = 5;
+
+    if (skor >= 0) cocok.push({ calon: calon, skor: skor });
+  });
+
+  cocok.sort(function(a, b) {
+    return a.skor - b.skor ||
+      (Number(a.calon.no) || 0) - (Number(b.calon.no) || 0) ||
+      String(a.calon.nama).localeCompare(String(b.calon.nama), 'id');
+  });
+
+  return cocok.slice(0, 10).map(function(x) { return x.calon; });
+}
+
+
+function perbaruiDropdownTidakJadi() {
+  const t = window.tidakJadi;
+  const input = document.getElementById('cariTidakJadi');
+  const dropdown = document.getElementById('dropdownTidakJadi');
+  if (!input || !dropdown) return;
+
+  const kata = input.value.trim();
+
+  if (!kata) {
+    tutupDropdownTidakJadi();
+    return;
+  }
+
+  t.hasil = cocokkanCalonTidakJadi(kata);
+
+  if (!t.hasil.length) {
+    t.aktif = -1;
+    dropdown.innerHTML =
+      '<div style="padding:12px 14px;color:#64748b;font-size:14px;">' +
+      (t.siap ? 'Tidak ada calon yang cocok.' : 'Memuat data calon siswa...') +
+      '</div>';
+  } else {
+    dropdown.innerHTML = t.hasil.map(function(c, i) {
+      return '<div class="opsi-checkin" role="option" data-id="' + escapeHtml(c.idCalon) +
+        '" data-index="' + i + '">' +
+        '<div style="font-weight:700;color:#1e3a8a;font-size:15px;">' + escapeHtml(c.nama) + '</div>' +
+        '<div style="margin-top:2px;font-size:12px;color:#64748b;">No. ' + escapeHtml(c.no) +
+        ' · Asal TK: ' + escapeHtml(c.asalTk || '-') +
+        '</div>' +
+        '</div>';
+    }).join('');
+
+    setAktifTidakJadi(0, false);
+  }
+
+  dropdown.scrollTop = 0;
+  dropdown.style.display = 'block';
+  input.setAttribute('aria-expanded', 'true');
+}
+
+
+function setAktifTidakJadi(indeks, gulir) {
+  const dropdown = document.getElementById('dropdownTidakJadi');
+  if (!dropdown) return;
+
+  window.tidakJadi.aktif = indeks;
+
+  dropdown.querySelectorAll('[data-index]').forEach(function(el) {
+    const aktif = Number(el.getAttribute('data-index')) === indeks;
+    el.classList.toggle('aktif', aktif);
+    if (aktif && gulir) el.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+
+function tutupDropdownTidakJadi() {
+  const t = window.tidakJadi;
+  const input = document.getElementById('cariTidakJadi');
+  const dropdown = document.getElementById('dropdownTidakJadi');
+
+  t.hasil = [];
+  t.aktif = -1;
+
+  if (dropdown) {
+    dropdown.style.display = 'none';
+    dropdown.innerHTML = '';
+  }
+
+  if (input) input.setAttribute('aria-expanded', 'false');
+}
+
+
+function pilihCalonTidakJadi(idCalon) {
+  const t = window.tidakJadi;
+
+  const calon = t.data.find(function(c) { return c.idCalon === idCalon; });
+  if (!calon) return;
+
+  tutupDropdownTidakJadi();
+  tampilkanKotakPesan('pesanTidakJadi', '', '');
+
+  const input = document.getElementById('cariTidakJadi');
+  if (input) input.value = (calon.no ? calon.no + ' - ' : '') + calon.nama;
+
+  t.terpilih = calon;
+  tampilkanKartuTidakJadi(calon);
+}
+
+
+function tampilkanKartuTidakJadi(calon) {
+  const kartu = document.getElementById('kartuTidakJadi');
+  if (!kartu) return;
+
+  window.tidakJadi.terpilih = calon;
+
+  if (!calon) {
+    kartu.style.display = 'none';
+    kartu.innerHTML = '';
+    return;
+  }
+
+  const baris = function(label, nilai) {
+    return '<div><div style="font-size:12px;color:#64748b;">' + label +
+      '</div><div style="font-weight:700;color:#1e293b;">' + nilai + '</div></div>';
+  };
+
+  const catatan = (calon.catatan || []).length
+    ? calon.catatan.join(', ')
+    : 'belum ada';
+
+  kartu.style.display = 'block';
+  kartu.innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">' +
+      baris('Nama', escapeHtml(calon.nama)) +
+      baris('Nomor Urut', escapeHtml(calon.no || '-')) +
+      baris('Asal TK', escapeHtml(calon.asalTk || '-')) +
+      baris('Data yang sudah ada', escapeHtml(catatan)) +
+    '</div>' +
+    '<div class="form-group" style="margin-top:16px;">' +
+      '<label for="ketTidakJadi">Keterangan (opsional)</label>' +
+      '<input type="text" id="ketTidakJadi" maxlength="200" autocomplete="off" ' +
+      'placeholder="Contoh: pindah sekolah / mengundurkan diri">' +
+    '</div>' +
+    '<div style="margin-top:4px;padding:12px;border-radius:9px;background:#fffbeb;color:#92400e;font-size:14px;line-height:1.5;">' +
+      'Calon akan dipindahkan ke daftar Tidak Jadi Daftar dan tidak lagi tampil di daftar daftar ulang. ' +
+      'Seluruh data yang pernah ada tidak dihapus.' +
+    '</div>' +
+    '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">' +
+      '<button type="button" id="btnTandaiTidakJadi" onclick="tandaiTidakJadi()" ' +
+      'style="padding:13px 22px;border:none;border-radius:10px;background:#ea580c;color:white;font-weight:bold;font-size:15px;cursor:pointer;">' +
+      '🚫 Tandai Tidak Jadi Daftar</button>' +
+      '<button type="button" onclick="batalTidakJadi()" ' +
+      'style="padding:13px 20px;border:none;border-radius:10px;background:#e5e7eb;color:#1f2937;font-weight:bold;font-size:15px;cursor:pointer;">Batal</button>' +
+    '</div>';
+}
+
+
+function tampilkanTabelTidakJadi() {
+  const tbody = document.getElementById('bodyTidakJadi');
+  const ringkas = document.getElementById('ringkasTidakJadi');
+  if (!tbody) return;
+
+  const daftar = window.tidakJadi.data.filter(function(c) { return c.tidakJadi; });
+
+  if (ringkas) ringkas.textContent = daftar.length + ' siswa tidak jadi daftar';
+
+  if (!daftar.length) {
+    tbody.innerHTML =
+      '<tr><td colspan="7" style="padding:16px;color:#64748b;">Belum ada siswa yang tidak jadi daftar.</td></tr>';
+    return;
+  }
+
+  const sel = 'padding:11px;border-bottom:1px solid #e5e7eb;';
+
+  tbody.innerHTML = daftar.map(function(c) {
+    return '<tr>' +
+      '<td style="' + sel + '">' + escapeHtml(c.no) + '</td>' +
+      '<td style="' + sel + '"><strong>' + escapeHtml(c.nama) + '</strong></td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.asalTk) + '</td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.keterangan || '-') + '</td>' +
+      '<td style="' + sel + '">' + escapeHtml((c.catatan || []).join(', ') || '-') + '</td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.waktu || '-') + '</td>' +
+      '<td style="' + sel + '">' +
+        '<button type="button" onclick="kembalikanTidakJadi(\'' + escapeHtml(c.idCalon) + '\')" ' +
+        'style="padding:7px 12px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer;font-weight:bold;">' +
+        'Kembalikan</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+
+function batalTidakJadi() {
+  const input = document.getElementById('cariTidakJadi');
+  if (input) input.value = '';
+
+  tampilkanKartuTidakJadi(null);
+  tampilkanKotakPesan('pesanTidakJadi', '', '');
+}
+
+
+function kirimStatusTidakJadi(namaAksi, payload, tombolId, teksTombol, pesanProses) {
+  const t = window.tidakJadi;
+
+  t.menghapus = true;
+
+  const tombol = tombolId ? document.getElementById(tombolId) : null;
+  if (tombol) { tombol.disabled = true; tombol.textContent = 'Memproses...'; }
+
+  tampilkanKotakPesan('pesanTidakJadi', pesanProses, 'info');
+
+  function selesai() {
+    t.menghapus = false;
+    if (tombol) { tombol.disabled = false; tombol.textContent = teksTombol; }
+  }
+
+  google.script.run
+    .withSuccessHandler(function(hasil) {
+      selesai();
+
+      if (!hasil || !hasil.success) {
+        tampilkanKotakPesan(
+          'pesanTidakJadi',
+          hasil && hasil.message ? hasil.message : 'Proses gagal.',
+          'error'
+        );
+        muatDaftarTidakJadi();
+        return;
+      }
+
+      const input = document.getElementById('cariTidakJadi');
+      if (input) input.value = '';
+
+      tampilkanKartuTidakJadi(null);
+      muatDaftarTidakJadi('✅ ' + (hasil.message || 'Berhasil.'));
+    })
+    .withFailureHandler(function(error) {
+      selesai();
+      tampilkanKotakPesan(
+        'pesanTidakJadi',
+        'Terjadi kesalahan. ' + (error && error.message ? error.message : ''),
+        'error'
+      );
+    })[namaAksi](payload);
+}
+
+
+function tandaiTidakJadi() {
+  const t = window.tidakJadi;
+  const calon = t.terpilih;
+
+  if (!calon || t.menghapus) return;
+
+  if (!window.userLogin || window.userLogin.role !== 'guru') {
+    tampilkanKotakPesan('pesanTidakJadi', 'Sesi tidak ditemukan. Silakan login kembali.', 'error');
+    return;
+  }
+
+  const ket = document.getElementById('ketTidakJadi');
+
+  if (!confirm(
+    'Pindahkan calon berikut ke daftar Tidak Jadi Daftar?\n\n' +
+    'Nama: ' + calon.nama + '\n' +
+    'Nomor: ' + (calon.no || '-') + '\n\n' +
+    'Data yang pernah ada tidak dihapus.'
+  )) return;
+
+  kirimStatusTidakJadi(
+    'tandaiTidakJadiDaftar',
+    {
+      idPetugas: window.userLogin.id,
+      idCalon: calon.idCalon,
+      keterangan: ket ? ket.value.trim() : ''
+    },
+    'btnTandaiTidakJadi',
+    '🚫 Tandai Tidak Jadi Daftar',
+    'Memindahkan calon...'
+  );
+}
+
+
+function kembalikanTidakJadi(idCalon) {
+  const t = window.tidakJadi;
+  const calon = t.data.find(function(c) { return c.idCalon === idCalon; });
+
+  if (!calon || t.menghapus) return;
+
+  if (!window.userLogin || window.userLogin.role !== 'guru') {
+    tampilkanKotakPesan('pesanTidakJadi', 'Sesi tidak ditemukan. Silakan login kembali.', 'error');
+    return;
+  }
+
+  if (!confirm(
+    'Kembalikan ' + calon.nama + ' ke daftar semula?\n\n' +
+    'Calon akan tampil lagi di daftar daftar ulang.'
+  )) return;
+
+  kirimStatusTidakJadi(
+    'batalkanTidakJadiDaftar',
+    { idPetugas: window.userLogin.id, idCalon: idCalon },
+    null,
+    '',
+    'Mengembalikan calon...'
+  );
+}
+
+
+/* =====================================================
+   SISWA KELUAR / TIDAK JADI DAFTAR (BENDAHARA)
+===================================================== */
+
+window.siswaKeluar = { data: [], total: 0, memuat: false };
+
+
+function bukaSiswaKeluar() {
+  tampilkanHalamanBendahara('halamanSiswaKeluar');
+
+  const cari = document.getElementById('pencarianSiswaKeluar');
+  if (cari) cari.value = '';
+
+  tampilkanKotakPesan('pesanSiswaKeluar', '', '');
+  muatSiswaKeluar();
+}
+
+
+function muatSiswaKeluar() {
+  const sk = window.siswaKeluar;
+  if (!window.userLogin || sk.memuat) return;
+
+  sk.memuat = true;
+
+  google.script.run
+    .withSuccessHandler(function(hasil) {
+      sk.memuat = false;
+
+      if (!hasil || !hasil.success) {
+        tampilkanKotakPesan(
+          'pesanSiswaKeluar',
+          hasil && hasil.message ? hasil.message : 'Data siswa keluar tidak dapat dibaca.',
+          'error'
+        );
+        return;
+      }
+
+      tampilkanKotakPesan('pesanSiswaKeluar', '', '');
+
+      sk.data = hasil.data || [];
+      sk.total = Number(hasil.totalTerbayar) || 0;
+
+      const set = function(id, nilai) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = nilai;
+      };
+
+      set('statKeluarJumlah', Number(hasil.jumlahSiswa) || 0);
+      set('statKeluarBayar', Number(hasil.jumlahPernahBayar) || 0);
+      set('statKeluarTotal', formatRupiah(sk.total));
+
+      tampilkanTabelSiswaKeluar();
+    })
+    .withFailureHandler(function(error) {
+      sk.memuat = false;
+      tampilkanKotakPesan(
+        'pesanSiswaKeluar',
+        'Gagal memuat data siswa keluar. ' + (error && error.message ? error.message : ''),
+        'error'
+      );
+    })
+    .getDataSiswaKeluar(window.userLogin.id);
+}
+
+
+function tampilkanTabelSiswaKeluar() {
+  const sk = window.siswaKeluar;
+  const tbody = document.getElementById('bodySiswaKeluar');
+  const tfoot = document.getElementById('footSiswaKeluar');
+  if (!tbody) return;
+
+  const kata = (document.getElementById('pencarianSiswaKeluar') || { value: '' })
+    .value.trim().toLowerCase();
+
+  const daftar = sk.data.filter(function(c) {
+    if (!kata) return true;
+    return String(c.no).toLowerCase().includes(kata) ||
+      String(c.nama).toLowerCase().includes(kata) ||
+      String(c.asalTk).toLowerCase().includes(kata);
+  });
+
+  const ringkas = document.getElementById('ringkasSiswaKeluar');
+  if (ringkas) {
+    ringkas.textContent = daftar.length + ' dari ' + sk.data.length + ' siswa • Total dibayarkan ' +
+      formatRupiah(sk.total);
+  }
+
+  if (!daftar.length) {
+    tbody.innerHTML =
+      '<tr><td colspan="8" style="padding:20px;text-align:center;">' +
+      (sk.data.length ? 'Tidak ada data yang sesuai.' : 'Belum ada siswa yang keluar / tidak jadi daftar.') +
+      '</td></tr>';
+    if (tfoot) tfoot.innerHTML = '';
+    return;
+  }
+
+  const sel = 'padding:12px;border-bottom:1px solid #e5e7eb;';
+
+  tbody.innerHTML = daftar.map(function(c) {
+    return '<tr>' +
+      '<td style="' + sel + '">' + escapeHtml(c.no) + '</td>' +
+      '<td style="' + sel + '"><strong>' + escapeHtml(c.nama) + '</strong></td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.asalTk) + '</td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.gelombang || '-') + '</td>' +
+      '<td style="' + sel + '" class="angka-kanan"><strong>' + formatRupiah(c.terbayar) + '</strong></td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.keterangan || '-') + '</td>' +
+      '<td style="' + sel + '">' + escapeHtml(c.waktu || '-') + '</td>' +
+      '<td style="' + sel + '">' +
+        '<button type="button" onclick="bukaRiwayatBayar(\'' + escapeHtml(c.idCalon) + '\')" ' +
+        'style="padding:7px 12px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer;font-weight:bold;">' +
+        'Riwayat</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  const totalTampil = daftar.reduce(function(j, c) { return j + c.terbayar; }, 0);
+
+  if (tfoot) {
+    tfoot.innerHTML =
+      '<tr style="background:#f8fafc;">' +
+        '<td colspan="4" style="padding:12px;font-weight:700;">Total (' + daftar.length + ' siswa)</td>' +
+        '<td class="angka-kanan" style="padding:12px;font-weight:700;color:#1e3a8a;">' + formatRupiah(totalTampil) + '</td>' +
+        '<td colspan="3"></td>' +
+      '</tr>';
+  }
 }
 
 
@@ -11575,9 +12398,10 @@ function tutupRiwayatBayar() {
 
 
 function bukaRiwayatBayar(idCalon) {
-  const c = window.bendaharaState.data.find(function(x) {
-    return x.idCalon === idCalon;
-  });
+  const cocok = function(x) { return x.idCalon === idCalon; };
+
+  const c = window.bendaharaState.data.find(cocok) ||
+    (window.siswaKeluar ? window.siswaKeluar.data.find(cocok) : null);
 
   if (!c) return;
 
