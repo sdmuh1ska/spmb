@@ -8926,6 +8926,15 @@ function buatFieldPengaturan(item) {
   } else if (item.tipe === 'angka') {
     kontrol = `<input type="number" id="${id}" step="any" min="0" value="${escapeHtml(item.nilai)}">`;
 
+  } else if (item.tipe === 'rupiah') {
+    kontrol =
+      `<input type="text" id="${id}" inputmode="numeric" autocomplete="off" maxlength="17" ` +
+      `data-terbilang="terbilang_${id}" oninput="formatInputJumlahBayar(this)" ` +
+      `value="${escapeHtml(item.nilai ? pisahRibuan(item.nilai) : '')}" ` +
+      `style="${gayaInput}font-weight:600;letter-spacing:0.5px;">` +
+      `<div id="terbilang_${id}" style="margin-top:6px;min-height:18px;font-size:13px;color:#475569;font-style:italic;">` +
+      `${item.nilai ? escapeHtml(terbilangRupiah(Number(item.nilai))) : ''}</div>`;
+
   } else if (item.tipe === 'pilihan') {
     kontrol =
       `<select id="${id}" style="${gayaInput}">` +
@@ -9084,7 +9093,10 @@ function simpanPengaturanForm(event) {
     const el = document.getElementById('pengaturan_' + item.parameter);
     if (!el) return;
 
-    const isi = String(el.value || '').trim();
+    let isi = String(el.value || '').trim();
+
+    // Nominal rupiah: kirim angka saja (titik pemisah dibuang)
+    if (item.tipe === 'rupiah') isi = isi.replace(/\D/g, '');
 
     if (isi === '') {
       kosong.push(item.label);
