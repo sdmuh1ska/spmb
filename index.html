@@ -6335,6 +6335,28 @@ function kembaliDetailCalon() {
 
     </div>
 
+    <div class="statistik-grid tiga">
+
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Sudah Membayar (Belum Lunas)</div>
+        <div id="rekapBayarSebagian" class="stat-number" style="color:#92400e;">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Sudah Lunas</div>
+        <div id="rekapBayarLunas" class="stat-number" style="color:#166534;">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📭</div>
+        <div class="stat-label">Belum Membayar</div>
+        <div id="rekapBayarBelum" class="stat-number" style="color:#991b1b;">0</div>
+      </div>
+
+    </div>
+
     <div class="welcome-card">
 
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -10208,7 +10230,8 @@ function resetDashboardBendahara() {
   const infoPot = document.getElementById('infoTagihanPotongan');
   if (infoPot) infoPot.style.display = 'none';
 
-  ['statBayarBelumLunas', 'statBayarLunas', 'statBayarBelum']
+  ['statBayarBelumLunas', 'statBayarLunas', 'statBayarBelum',
+   'rekapBayarSebagian', 'rekapBayarLunas', 'rekapBayarBelum']
     .forEach(function(id) {
       const el = document.getElementById(id);
       if (el) el.textContent = '0';
@@ -10316,7 +10339,10 @@ function perbaruiAngkaBendahara() {
   const peta = {
     statBayarBelumLunas: hitung('BELUM LUNAS'),
     statBayarLunas: hitung('LUNAS'),
-    statBayarBelum: hitung('BELUM BAYAR')
+    statBayarBelum: hitung('BELUM BAYAR'),
+    rekapBayarSebagian: hitung('BELUM LUNAS'),
+    rekapBayarLunas: hitung('LUNAS'),
+    rekapBayarBelum: hitung('BELUM BAYAR')
   };
 
   Object.keys(peta).forEach(function(id) {
