@@ -1853,6 +1853,7 @@
 
     // nama fungsi di halaman : [action di doGet, [urutan parameter]]
     const GET_API = {
+      getInfoSekolah: ['getInfoSekolah', []],
       loginUser:              ['login', ['username', 'password']],
       getStatistikAdmin:      ['getStatistikAdmin', []],
       getDataCalonAdmin:      ['getDataCalonAdmin', []],
@@ -2080,7 +2081,32 @@ function prosesLogin(event) {
  * MENAMPILKAN DASHBOARD
  ************************************************/
 
+/* Info sekolah (tahun pelajaran, kepala sekolah) dari Pengaturan */
+window.dataInfoSekolah = window.dataInfoSekolah || {
+  tahunPelajaran: '2028/2029',
+  namaKepalaSekolah: 'Hj. Sri Sayekti, S.Pd., M.Pd.'
+};
+
+function infoSekolah() {
+  return window.dataInfoSekolah;
+}
+
+function muatInfoSekolah() {
+  try {
+    google.script.run
+      .withSuccessHandler(function(h) {
+        if (!h || !h.success) return;
+        if (h.tahunPelajaran) window.dataInfoSekolah.tahunPelajaran = h.tahunPelajaran;
+        if (h.namaKepalaSekolah) window.dataInfoSekolah.namaKepalaSekolah = h.namaKepalaSekolah;
+      })
+      .withFailureHandler(function() {})
+      .getInfoSekolah();
+  } catch (e) {}
+}
+
 function tampilkanDashboard(user) {
+
+  muatInfoSekolah();
 
   // =================================================
   // SEMBUNYIKAN SEMUA HALAMAN UTAMA TERLEBIH DAHULU
@@ -4646,7 +4672,7 @@ function tampilkanKartuAkun(data) {
               <div class="tt-ttd-slot"></div>
 
               <div class="tt-garis">
-                (Hj. Sri Sayekti, S.Pd., M.Pd.)
+                (${escapeHtml(infoSekolah().namaKepalaSekolah)})
               </div>
 
             </div>
@@ -4844,7 +4870,7 @@ function tulisKwitansiPendaftaran(jendela, data, aset) {
     <div class="judul">
       <div class="b1">Bukti Pembayaran Pendaftaran SPMB</div>
       <div class="b2">SD Muhammadiyah 1 Ketelan Surakarta</div>
-      <div class="b3">Tahun Pelajaran 2028/2029</div>
+      <div class="b3">Tahun Pelajaran ${escapeHtml(infoSekolah().tahunPelajaran)}</div>
     </div>
 
     <div class="logo">${tagLogo(aset.logoKanan, 'Logo Kanan')}</div>
@@ -5558,7 +5584,7 @@ body {
       </div>
 
       <div class="judulBaris3">
-        TAHUN PELAJARAN 2028/2029
+        TAHUN PELAJARAN ${escapeHtml(infoSekolah().tahunPelajaran.toUpperCase())}
       </div>
 
     </div>
@@ -6346,7 +6372,7 @@ function kembaliDetailCalon() {
 
       <div>
         <h2>📊 Laporan Keuangan</h2>
-        <p>SPMB Tahun Pelajaran 2028/2029</p>
+        <p>SPMB Tahun Pelajaran ${escapeHtml(infoSekolah().tahunPelajaran)}</p>
       </div>
 
       <button type="button" onclick="kembaliDariLaporanKeuangan()" class="btn-logout">
@@ -6383,7 +6409,7 @@ function kembaliDetailCalon() {
     <div class="welcome-card" style="text-align:center; border:2px solid #dcbcd2; background:#f6ebf3;">
 
       <div style="font-size:15px; color:#4a1a40; font-weight:700;">
-        Total Keuangan SPMB 2028/2029
+        Total Keuangan SPMB ${escapeHtml(infoSekolah().tahunPelajaran)}
       </div>
 
       <div id="lapTotal" style="margin-top:6px; font-size:36px; font-weight:800; color:#4a1a40;">
@@ -9005,6 +9031,12 @@ function buatFieldPengaturan(item) {
       `<div id="terbilang_${id}" style="margin-top:6px;min-height:18px;font-size:13px;color:#475569;font-style:italic;">` +
       `${item.nilai ? escapeHtml(terbilangRupiah(Number(item.nilai))) : ''}</div>`;
 
+  } else if (item.tipe === 'bilangan') {
+    kontrol = `<input type="number" id="${id}" step="1" min="${Number(item.min) || 1}" max="${Number(item.max) || 20}" value="${escapeHtml(item.nilai)}">`;
+
+  } else if (item.tipe === 'teks') {
+    kontrol = `<input type="text" id="${id}" maxlength="120" autocomplete="off" value="${escapeHtml(item.nilai)}" style="${gayaInput}">`;
+
   } else if (item.tipe === 'pilihan') {
     kontrol =
       `<select id="${id}" style="${gayaInput}">` +
@@ -9243,6 +9275,7 @@ function simpanPengaturanForm(event) {
       );
 
       muatPengaturan(true);
+      muatInfoSekolah();
     })
     .withFailureHandler(function(error) {
       selesai();
@@ -12599,7 +12632,7 @@ function cetakKwitansiBayar() {
     <div class="judul">
       <div class="b1">Kwitansi Pembayaran SPMB</div>
       <div class="b2">SD Muhammadiyah 1 Ketelan Surakarta</div>
-      <div class="b3">Tahun Pelajaran 2028/2029</div>
+      <div class="b3">Tahun Pelajaran ${escapeHtml(infoSekolah().tahunPelajaran)}</div>
     </div>
 
     <div class="logo">${tagLogo(aset.logoKanan, 'Logo Kanan')}</div>
@@ -12642,7 +12675,7 @@ function cetakKwitansiBayar() {
     <div>
       <div>Kepala Sekolah</div>
       <div class="ruang">${aset.ttd ? '<img class="gambar-ttd" alt="" src="' + aset.ttd + '">' : ''}</div>
-      <div class="nama-kepsek">Hj. Sri Sayekti, S.Pd., M.Pd</div>
+      <div class="nama-kepsek">${escapeHtml(infoSekolah().namaKepalaSekolah)}</div>
     </div>
     <div>
       <div>Orang Tua/Wali</div>
