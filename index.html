@@ -4942,12 +4942,14 @@ function isiJendelaKwitansi(jendela, data, saatGagal) {
 }
 
 
-/* Cetak ulang kwitansi Check In terakhir (tombol di halaman Check In) */
-function cetakUlangKwitansiCheckIn() {
-  const data = window.kwitansiCheckInTerakhir;
+/* Cetak (ulang) kwitansi pendaftaran dari baris tabel Daftar Check In */
+function cetakKwitansiCheckIn(idCalon) {
+  const baris = (window.dataCheckInAktif || []).find(function(r) {
+    return String(r.idCalon) === String(idCalon);
+  });
 
-  if (!data) {
-    alert('Belum ada Check In yang dapat dicetak kwitansinya.');
+  if (!baris) {
+    alert('Data Check In tidak ditemukan. Muat ulang daftar lalu coba lagi.');
     return;
   }
 
@@ -4958,10 +4960,15 @@ function cetakUlangKwitansiCheckIn() {
     return;
   }
 
-  isiJendelaKwitansi(jendela, data, function() {
-    alert('Logo tidak dapat dimuat. Periksa koneksi lalu coba lagi.');
-  });
+  isiJendelaKwitansi(
+    jendela,
+    { no: baris.no || '', nama: baris.nama || '', biaya: baris.biayaPendaftaran },
+    function() {
+      alert('Logo tidak dapat dimuat. Periksa koneksi lalu coba lagi.');
+    }
+  );
 }
+
 
 
 function cetakKartuAkun() {
@@ -7335,14 +7342,6 @@ function kembaliDetailCalon() {
 
       <div id="pesanCheckIn" role="status" aria-live="polite" style="display:none; margin-top:15px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"></div>
 
-      <button
-        type="button"
-        id="btnCetakUlangKwitansiCheckIn"
-        onclick="cetakUlangKwitansiCheckIn()"
-        style="display:none; margin-top:12px; padding:10px 16px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; font-weight:bold; cursor:pointer;"
-      >
-        🧾 Cetak Ulang Kwitansi
-      </button>
 
     </div>
 
@@ -7366,7 +7365,7 @@ function kembaliDetailCalon() {
       </p>
 
       <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; min-width:650px;">
+        <table style="width:100%; border-collapse:collapse; min-width:760px;">
           <thead>
             <tr style="background:#f6ebf3; text-align:left;">
               <th style="padding:11px; border-bottom:1px solid #ead2e3;">Urutan</th>
@@ -7375,12 +7374,13 @@ function kembaliDetailCalon() {
               <th style="padding:11px; border-bottom:1px solid #ead2e3;">Tanggal</th>
               <th style="padding:11px; border-bottom:1px solid #ead2e3;">Jam</th>
               <th style="padding:11px; border-bottom:1px solid #ead2e3;">Ruang</th>
+              <th style="padding:11px; border-bottom:1px solid #ead2e3;">Aksi</th>
             </tr>
           </thead>
 
           <tbody id="bodyDaftarCheckIn">
             <tr>
-              <td colspan="6" style="padding:15px; color:#64748b;">
+              <td colspan="7" style="padding:15px; color:#64748b;">
                 Memuat data...
               </td>
             </tr>
@@ -8349,29 +8349,26 @@ function prosesSimpanCheckIn(calon) {
       }
 
       // Kwitansi pembayaran pendaftaran dicetak otomatis
-      window.kwitansiCheckInTerakhir = {
+      const dataKwitansi = {
         no: hasil.no || calon.no || '',
         nama: hasil.nama || calon.nama,
         biaya: hasil.biayaPendaftaran
       };
 
-      const tombolUlang = document.getElementById('btnCetakUlangKwitansiCheckIn');
-      if (tombolUlang) tombolUlang.style.display = 'inline-block';
-
       let catatanKwitansi = '\nKwitansi pendaftaran sedang dicetak.';
 
       if (jendelaKwitansi) {
-        isiJendelaKwitansi(jendelaKwitansi, window.kwitansiCheckInTerakhir, function() {
+        isiJendelaKwitansi(jendelaKwitansi, dataKwitansi, function() {
           tampilkanPesanCheckIn(
             'Check In berhasil, tetapi logo kwitansi tidak dapat dimuat.\n' +
-            'Tekan "Cetak Ulang Kwitansi" setelah koneksi pulih.',
+            'Cetak ulang lewat tombol "Cetak Kwitansi" di Daftar Check In.',
             'error'
           );
         });
       } else {
         catatanKwitansi =
           '\nPopup kwitansi diblokir browser. Izinkan popup, lalu tekan ' +
-          '"Cetak Ulang Kwitansi".';
+          '"Cetak Kwitansi" pada baris calon di Daftar Check In.';
       }
 
       tampilkanPesanCheckIn(
@@ -8431,7 +8428,7 @@ function muatDataCheckIn() {
         if (tbody) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="6" style="padding:15px;text-align:center;color:#991b1b;">
+              <td colspan="7" style="padding:15px;text-align:center;color:#991b1b;">
                 Data gagal dimuat.
               </td>
             </tr>`;
@@ -8443,6 +8440,8 @@ function muatDataCheckIn() {
         return Number(a.urutan || 0) - Number(b.urutan || 0);
       });
 
+      window.dataCheckInAktif = data;
+
       if (status) {
         status.textContent =
           data.length + ' calon sudah Check In.';
@@ -8453,7 +8452,7 @@ function muatDataCheckIn() {
       if (data.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" style="padding:15px;text-align:center;color:#64748b;">
+            <td colspan="7" style="padding:15px;text-align:center;color:#64748b;">
               Belum ada data Check In.
             </td>
           </tr>`;
@@ -8480,6 +8479,12 @@ function muatDataCheckIn() {
             <td style="padding:11px;border-bottom:1px solid #e5e7eb;">${tanggal}</td>
             <td style="padding:11px;border-bottom:1px solid #e5e7eb;">${jam}</td>
             <td style="padding:11px;border-bottom:1px solid #e5e7eb;">${ruang}</td>
+            <td style="padding:11px;border-bottom:1px solid #e5e7eb;">
+              <button type="button" onclick="cetakKwitansiCheckIn('${id}')"
+                style="padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%);color:white;cursor:pointer;font-weight:bold;white-space:nowrap;">
+                🧾 Cetak Kwitansi
+              </button>
+            </td>
           </tr>`;
       }).join('');
     })
@@ -8495,7 +8500,7 @@ function muatDataCheckIn() {
       if (tbody) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" style="padding:15px;color:#991b1b;">
+            <td colspan="7" style="padding:15px;color:#991b1b;">
               Data gagal dimuat. Periksa pesan kesalahan di atas.
             </td>
           </tr>`;
