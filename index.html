@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>SPMB SD MUHAMMADIYAH 1 SURAKARTA</title>
+  <title>Hasil Observasi Peserta Didik</title>
 
 <style>
 
@@ -1475,7 +1475,7 @@
       </div>
 
       <div class="title">
-        Portal Observasi SPMB
+        Portal Hasil Observasi SPMB
       </div>
 
       <div class="subtitle">
@@ -1586,7 +1586,7 @@
     >
 
       <h2>
-        📋 SPMB SD MUH 1 SURAKARTA
+        📋 HASIL OBSERVASI PESERTA DIDIK
       </h2>
 
       <p
@@ -4671,14 +4671,6 @@ function tampilkanKartuAkun(data) {
         🖨️ Cetak Kartu
       </button>
 
-      <button
-        type="button"
-        class="btn-kwitansi"
-        onclick="cetakKwitansi()"
-      >
-        🧾 Cetak Kwitansi
-      </button>
-
     </div>
 
   `;
@@ -4689,69 +4681,40 @@ function tampilkanKartuAkun(data) {
 }
 
 /****************************************************
- * CETAK KWITANSI PEMBAYARAN PENDAFTARAN
+ * KWITANSI PEMBAYARAN PENDAFTARAN
+ *
+ * Dicetak otomatis saat Check In berhasil (biaya pendaftaran
+ * wajib dibayar untuk Check In). Nominal mengikuti Pengaturan
+ * (BIAYA_PENDAFTARAN); bila tidak tersedia dipakai Rp 300.000.
  ****************************************************/
 
-function cetakKwitansi() {
+function tulisKwitansiPendaftaran(jendela, data, aset) {
 
-  const data = window.dataKartuAktif;
+  const namaBulan = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
 
-  if (!data) {
-    alert('Data calon belum siap.');
-    return;
+  const hariIni = new Date();
+
+  const tanggalTampil =
+    hariIni.getDate() + ' ' +
+    namaBulan[hariIni.getMonth()] + ' ' +
+    hariIni.getFullYear();
+
+  const nominal = Number(data.biaya) > 0 ? Number(data.biaya) : 300000;
+  const nominalTampil = pisahRibuan(nominal);
+  const terbilangNominal = terbilangRupiah(nominal);
+
+  function tagLogo(logo, alt) {
+    if (!logo || !logo.data) return '';
+    return '<img src="data:' + logo.mimeType + ';base64,' +
+           logo.data + '" alt="' + alt + '">';
   }
 
-  const tombol =
-    document.querySelector('#tombolKartuAkun .btn-kwitansi');
+  jendela.document.open();
 
-  if (tombol) {
-    tombol.disabled = true;
-    tombol.textContent = '⏳ Menyiapkan kwitansi...';
-  }
-
-  function pulihkanTombol() {
-    if (tombol) {
-      tombol.disabled = false;
-      tombol.textContent = '🧾 Cetak Kwitansi';
-    }
-  }
-
-  // Jendela dibuka lebih dulu (dalam klik pengguna) agar tidak diblokir popup
-  const jendela =
-    window.open('', '_blank', 'width=900,height=700');
-
-  if (!jendela) {
-    alert(
-      'Popup diblokir browser. ' +
-      'Silakan izinkan popup untuk aplikasi ini.'
-    );
-    pulihkanTombol();
-    return;
-  }
-
-  muatAsetCetak(function(aset) {
-
-    const namaBulan = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-
-    const hariIni = new Date();
-
-    const tanggalTampil =
-      hariIni.getDate() + ' ' +
-      namaBulan[hariIni.getMonth()] + ' ' +
-      hariIni.getFullYear();
-
-    function tagLogo(logo, alt) {
-      if (!logo || !logo.data) return '';
-      return '<img src="data:' + logo.mimeType + ';base64,' +
-             logo.data + '" alt="' + alt + '">';
-    }
-
-    jendela.document.open();
-
-    jendela.document.write(`
+  jendela.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
@@ -4904,7 +4867,7 @@ function cetakKwitansi() {
     <tr>
       <td class="label">Uang Sejumlah</td>
       <td class="titik">:</td>
-      <td class="miring">Tiga Ratus Ribu Rupiah</td>
+      <td class="miring">${escapeHtml(terbilangNominal)}</td>
     </tr>
     <tr>
       <td class="label">Untuk Pembayaran</td>
@@ -4915,7 +4878,7 @@ function cetakKwitansi() {
 
   <div class="bawah">
 
-    <div class="terbilang-rp">Terbilang Rp. 300.000,-</div>
+    <div class="terbilang-rp">Terbilang Rp. ${nominalTampil},-</div>
 
     <div class="ttd">
       <div>Surakarta, ${tanggalTampil}</div>
@@ -4942,22 +4905,64 @@ function cetakKwitansi() {
 </html>
     `);
 
+  jendela.document.close();
+}
+
+
+/* Membuka jendela cetak di dalam klik pengguna (agar tidak diblokir popup) */
+function bukaJendelaKwitansi(pesan) {
+  const jendela = window.open('', '_blank', 'width=900,height=700');
+
+  if (!jendela) return null;
+
+  try {
+    jendela.document.open();
+    jendela.document.write(
+      '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Kwitansi</title></head>' +
+      '<body style="font-family:Arial,sans-serif;text-align:center;padding:60px;color:#4a1a40;">' +
+      escapeHtml(pesan || 'Menyiapkan kwitansi...') + '</body></html>'
+    );
     jendela.document.close();
+  } catch (e) {}
 
-    pulihkanTombol();
+  return jendela;
+}
 
+
+/* Mengisi jendela yang sudah dibuka dengan kwitansi + logo */
+function isiJendelaKwitansi(jendela, data, saatGagal) {
+  muatAsetCetak(function(aset) {
+    if (jendela.closed) return;
+    tulisKwitansiPendaftaran(jendela, data, aset);
   }, function(error) {
-
     console.error('Gagal memuat logo kwitansi:', error);
-
-    jendela.close();
-
-    alert('Logo tidak dapat dimuat. Periksa koneksi lalu coba lagi.');
-
-    pulihkanTombol();
-
+    try { jendela.close(); } catch (e) {}
+    if (typeof saatGagal === 'function') saatGagal();
   });
 }
+
+
+/* Cetak ulang kwitansi Check In terakhir (tombol di halaman Check In) */
+function cetakUlangKwitansiCheckIn() {
+  const data = window.kwitansiCheckInTerakhir;
+
+  if (!data) {
+    alert('Belum ada Check In yang dapat dicetak kwitansinya.');
+    return;
+  }
+
+  const jendela = bukaJendelaKwitansi();
+
+  if (!jendela) {
+    alert('Popup diblokir browser. Silakan izinkan popup untuk aplikasi ini.');
+    return;
+  }
+
+  isiJendelaKwitansi(jendela, data, function() {
+    alert('Logo tidak dapat dimuat. Periksa koneksi lalu coba lagi.');
+  });
+}
+
 
 function cetakKartuAkun() {
 
@@ -7330,6 +7335,15 @@ function kembaliDetailCalon() {
 
       <div id="pesanCheckIn" role="status" aria-live="polite" style="display:none; margin-top:15px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"></div>
 
+      <button
+        type="button"
+        id="btnCetakUlangKwitansiCheckIn"
+        onclick="cetakUlangKwitansiCheckIn()"
+        style="display:none; margin-top:12px; padding:10px 16px; border:none; border-radius:10px; background:linear-gradient(135deg, #4a1a40 0%, #35102e 52%, #230520 100%); color:white; font-weight:bold; cursor:pointer;"
+      >
+        🧾 Cetak Ulang Kwitansi
+      </button>
+
     </div>
 
     <!-- DAFTAR SUDAH CHECK IN -->
@@ -8202,6 +8216,11 @@ function tampilkanDialogCheckIn(calon, saatSetuju, saatBatal) {
           <span>Ruang observasi akan ditentukan otomatis berdasarkan urutan Check In.</span>
         </div>
 
+        <div class="dialog-info" style="margin-top:10px;">
+          <span aria-hidden="true">🧾</span>
+          <span>Kwitansi pembayaran pendaftaran akan dicetak otomatis. Pastikan biaya pendaftaran sudah diterima.</span>
+        </div>
+
       </div>
 
       <div class="dialog-aksi">
@@ -8279,6 +8298,19 @@ function prosesSimpanCheckIn(calon) {
 
   window.prosesCheckInBerjalan = true;
 
+  // Jendela kwitansi dibuka lebih dulu (masih di dalam klik pengguna)
+  // agar tidak diblokir popup; diisi setelah Check In berhasil.
+  const jendelaKwitansi = bukaJendelaKwitansi('Menyimpan Check In...');
+
+  // Unduh logo lebih awal supaya kwitansi cepat siap
+  muatAsetCetak(function() {}, function() {});
+
+  function tutupJendelaKwitansi() {
+    if (jendelaKwitansi) {
+      try { jendelaKwitansi.close(); } catch (e) {}
+    }
+  }
+
   if (input) {
     input.value = '';
     input.disabled = true;
@@ -8310,16 +8342,44 @@ function prosesSimpanCheckIn(calon) {
           'error'
         );
 
+        tutupJendelaKwitansi();
         muatDaftarCalonCheckIn();
         muatDataCheckIn();
         return;
+      }
+
+      // Kwitansi pembayaran pendaftaran dicetak otomatis
+      window.kwitansiCheckInTerakhir = {
+        no: hasil.no || calon.no || '',
+        nama: hasil.nama || calon.nama,
+        biaya: hasil.biayaPendaftaran
+      };
+
+      const tombolUlang = document.getElementById('btnCetakUlangKwitansiCheckIn');
+      if (tombolUlang) tombolUlang.style.display = 'inline-block';
+
+      let catatanKwitansi = '\nKwitansi pendaftaran sedang dicetak.';
+
+      if (jendelaKwitansi) {
+        isiJendelaKwitansi(jendelaKwitansi, window.kwitansiCheckInTerakhir, function() {
+          tampilkanPesanCheckIn(
+            'Check In berhasil, tetapi logo kwitansi tidak dapat dimuat.\n' +
+            'Tekan "Cetak Ulang Kwitansi" setelah koneksi pulih.',
+            'error'
+          );
+        });
+      } else {
+        catatanKwitansi =
+          '\nPopup kwitansi diblokir browser. Izinkan popup, lalu tekan ' +
+          '"Cetak Ulang Kwitansi".';
       }
 
       tampilkanPesanCheckIn(
         'Check In berhasil!\n' +
         'Nama: ' + hasil.nama + '\n' +
         'Urutan: ' + hasil.urutan + '\n' +
-        'Ruang observasi: ' + hasil.ruang,
+        'Ruang observasi: ' + hasil.ruang +
+        catatanKwitansi,
         'success'
       );
 
@@ -8331,6 +8391,8 @@ function prosesSimpanCheckIn(calon) {
       selesai();
 
       console.error('Gagal menyimpan Check In:', error);
+
+      tutupJendelaKwitansi();
 
       tampilkanPesanCheckIn(
         'Terjadi kesalahan saat menyimpan Check In. ' +
