@@ -1868,6 +1868,7 @@
 
     // nama fungsi di halaman : [action di doGet, [urutan parameter]]
     const GET_API = {
+      getPengingatGelombang: ['getPengingatGelombang', ['idPetugas']],
       getRiwayatPerubahan: ['getRiwayatPerubahan', ['idPetugas']],
       getDashboardKetua: ['getDashboardKetua', ['idPetugas']],
       getDaftarTahunAjaran: ['getDaftarTahunAjaran', ['idPetugas']],
@@ -2605,6 +2606,10 @@ function bukaDashboardAdmin() {
    ****************************************************/
 
 function muatStatistikAdmin() {
+
+  if (typeof muatPengingatGelombang === 'function') {
+    muatPengingatGelombang('pengingatGelombangAdmin', false);
+  }
 
   google.script.run
 
@@ -5977,6 +5982,8 @@ function kembaliDetailCalon() {
       style="margin:-6px 0 20px; text-align:center; font-size:13px; color:#64748b;"
     ></p>
 
+    <div id="pengingatGelombangBendahara" style="margin-bottom:20px;"></div>
+
     <div class="menu-admin">
 
       <button type="button" onclick="bukaBayarInput()">
@@ -7028,6 +7035,8 @@ function kembaliDetailCalon() {
 
     </div>
 
+
+    <div id="pengingatGelombangAdmin" style="margin-bottom:20px;"></div>
 
     <!-- MENU ADMIN (dikelompokkan) -->
 
@@ -10797,6 +10806,7 @@ function mulaiDashboardBendahara() {
 
   tampilkanHalamanBendahara('dashboardBendahara');
   muatDataBayar();
+  muatPengingatGelombang('pengingatGelombangBendahara', true);
 }
 
 
@@ -10883,6 +10893,46 @@ function muatDashboardKetua() {
 }
 
 
+/* ============ PENGINGAT GELOMBANG ============ */
+
+function muatPengingatGelombang(idKontainer, denganAksi) {
+  const kotak = document.getElementById(idKontainer);
+  if (!kotak || !window.userLogin) return;
+
+  const level = String(window.userLogin.level || '').toUpperCase();
+  if (level !== 'ADMIN' && level !== 'BENDAHARA') return;
+
+  google.script.run
+    .withSuccessHandler(function(h) {
+      if (!h || !h.success || !h.data.length) { kotak.innerHTML = ''; return; }
+
+      const aksi = {
+        gelombangCalon: ['Pilih gelombang calon', 'bukaGelombangCalon()'],
+        pengaturanGelombang: ['Buka Pengaturan Gelombang', 'bukaPengaturanGelombang()'],
+        dataBayar: ['Lihat data pembayaran', 'bukaBayarData()']
+      };
+
+      kotak.innerHTML =
+        '<div style="font-weight:700;color:#4a1a40;margin-bottom:8px;font-size:15px;">🔔 Pengingat Gelombang</div>' +
+        h.data.map(function(x) {
+          const peringatan = x.tingkat === 'peringatan';
+          const gaya = peringatan
+            ? 'background:#fef3c7;border:1px solid #fde68a;color:#92400e;'
+            : 'background:#e0f2fe;border:1px solid #bae6fd;color:#075985;';
+          const a = denganAksi && x.aksi && aksi[x.aksi]
+            ? ' <button type="button" onclick="' + aksi[x.aksi][1] + '" ' +
+              'style="margin-left:6px;padding:5px 10px;border:none;border-radius:8px;background:white;color:#4a1a40;font-weight:700;font-size:12px;cursor:pointer;">' +
+              escapeHtml(aksi[x.aksi][0]) + '</button>'
+            : '';
+          return '<div style="' + gaya + 'padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:13px;line-height:1.6;">' +
+            (peringatan ? '⚠️ ' : 'ℹ️ ') + escapeHtml(x.teks) + a + '</div>';
+        }).join('');
+    })
+    .withFailureHandler(function() { kotak.innerHTML = ''; })
+    .getPengingatGelombang(window.userLogin.id);
+}
+
+
 /* Dipanggil saat logout */
 function resetDashboardBendahara() {
   const st = window.bendaharaState;
@@ -10939,6 +10989,7 @@ function resetDashboardBendahara() {
 function kembaliKeDashboardBendahara() {
   tampilkanHalamanBendahara('dashboardBendahara');
   muatDataBayar();
+  muatPengingatGelombang('pengingatGelombangBendahara', true);
 }
 
 
