@@ -473,7 +473,22 @@
 }
 
 
+.judul-menu {
+  margin: 22px 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #4a1a40;
+  padding-left: 10px;
+  border-left: 4px solid #b98aae;
+}
+
+.judul-menu:first-of-type {
+  margin-top: 6px;
+}
+
+
 /* MENU ADMIN */
+
 
 .menu-admin {
   display: grid;
@@ -1853,6 +1868,7 @@
 
     // nama fungsi di halaman : [action di doGet, [urutan parameter]]
     const GET_API = {
+      getDashboardKetua: ['getDashboardKetua', ['idPetugas']],
       getDaftarTahunAjaran: ['getDaftarTahunAjaran', ['idPetugas']],
       getInfoSekolah: ['getInfoSekolah', []],
       getStatistikAdmin:      ['getStatistikAdmin', []],
@@ -2150,6 +2166,25 @@ function tampilkanDashboard(user) {
     dashboardBendahara.style.display = 'none';
   }
 
+  const dashboardKetua = document.getElementById('dashboardKetua');
+  if (dashboardKetua) dashboardKetua.style.display = 'none';
+
+
+  // =================================================
+  // KETUA / KEPALA SEKOLAH
+  // =================================================
+
+  if (
+    user &&
+    user.role === 'guru' &&
+    String(user.level || '').trim().toUpperCase() === 'KETUA'
+  ) {
+
+    mulaiDashboardKetua();
+
+    return;
+  }
+
 
   // =================================================
   // BENDAHARA
@@ -2419,6 +2454,9 @@ function logout() {
   if (typeof resetDashboardBendahara === 'function') {
     resetDashboardBendahara();
   }
+
+  const dashKetuaLogout = document.getElementById('dashboardKetua');
+  if (dashKetuaLogout) dashKetuaLogout.style.display = 'none';
 
 
   ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanTahunBaru','halamanHasilAdmin','halamanTidakJadi']
@@ -5755,6 +5793,144 @@ function kembaliDetailCalon() {
      DASHBOARD BENDAHARA
 ================================================== -->
 
+<div id="dashboardKetua" style="display:none; min-height:100vh; background:#f1f5f9;">
+
+  <div class="admin-container">
+
+    <div class="admin-header">
+      <div>
+        <h2>📈 Dashboard Pimpinan</h2>
+        <p id="namaKetua">Selamat datang</p>
+      </div>
+      <button type="button" onclick="logout()" class="btn-logout">Keluar</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+      <div style="font-size:14px;color:#374151;">
+        SPMB Tahun Pelajaran <b id="ketuaTahun">-</b>
+        <span id="ketuaDiperbarui" style="display:block;font-size:12px;color:#64748b;"></span>
+      </div>
+      <button type="button" id="btnMuatKetua" onclick="muatDashboardKetua()"
+        style="padding:10px 18px;border:none;border-radius:10px;background:#e5e7eb;color:#1f2937;font-weight:bold;font-size:14px;cursor:pointer;">
+        🔄 Muat Ulang
+      </button>
+    </div>
+
+    <div id="pesanKetua" role="status" aria-live="polite"
+      style="display:none; margin-bottom:16px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"></div>
+
+    <h3 style="margin:6px 0 10px;font-size:15px;color:#4a1a40;">Pendaftaran & Observasi</h3>
+    <div class="statistik-grid tiga">
+
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Jumlah Calon</div>
+        <div id="ketuaCalon" class="stat-number" style="color:#4a1a40;">0</div>
+        <div id="ketuaCalonSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-label">Sudah Check In</div>
+        <div id="ketuaCheckIn" class="stat-number" style="color:#1d4ed8;">0</div>
+        <div id="ketuaCheckInSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🧑‍🏫</div>
+        <div class="stat-label">Sudah Observasi</div>
+        <div id="ketuaObservasi" class="stat-number" style="color:#7a2d6b;">0</div>
+        <div id="ketuaObservasiSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+
+    </div>
+
+    <h3 style="margin:6px 0 10px;font-size:15px;color:#4a1a40;">Hasil Observasi</h3>
+    <div class="statistik-grid tiga">
+
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Diterima</div>
+        <div id="ketuaDiterima" class="stat-number" style="color:#166534;">0</div>
+        <div id="ketuaDiterimaSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Belum Diterima</div>
+        <div id="ketuaBelumDiterima" class="stat-number" style="color:#92400e;">0</div>
+        <div id="ketuaBelumDiterimaSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-label">Tidak Diterima</div>
+        <div id="ketuaTidakDiterima" class="stat-number" style="color:#991b1b;">0</div>
+        <div id="ketuaTidakDiterimaSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+
+    </div>
+
+    <h3 style="margin:6px 0 10px;font-size:15px;color:#4a1a40;">Daftar Ulang</h3>
+    <div class="statistik-grid tiga">
+
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Sudah Membayar (Belum Lunas)</div>
+        <div id="ketuaBelumLunas" class="stat-number" style="color:#92400e;">0</div>
+        <div id="ketuaBelumLunasSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Sudah Lunas</div>
+        <div id="ketuaLunas" class="stat-number" style="color:#166534;">0</div>
+        <div id="ketuaLunasSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📭</div>
+        <div class="stat-label">Belum Membayar</div>
+        <div id="ketuaBelumBayar" class="stat-number" style="color:#991b1b;">0</div>
+        <div id="ketuaBelumBayarSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+
+    </div>
+
+    <h3 style="margin:6px 0 10px;font-size:15px;color:#4a1a40;">Tidak Jadi Daftar</h3>
+    <div class="statistik-grid" style="grid-template-columns:minmax(0,1fr);">
+
+      <div class="stat-card">
+        <div class="stat-icon">🚪</div>
+        <div class="stat-label">Jumlah Calon Tidak Jadi Daftar</div>
+        <div id="ketuaTidakJadi" class="stat-number" style="color:#4a1a40;">0</div>
+        <div id="ketuaTidakJadiSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+
+    </div>
+
+    <h3 style="margin:6px 0 10px;font-size:15px;color:#4a1a40;">Keuangan SPMB</h3>
+    <div class="statistik-grid tiga">
+
+      <div class="stat-card">
+        <div class="stat-icon">🧾</div>
+        <div class="stat-label">Jumlah Biaya Pendaftaran</div>
+        <div id="ketuaBiayaDaftar" class="stat-number" style="color:#1d4ed8;">0</div>
+        <div id="ketuaBiayaDaftarSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💳</div>
+        <div class="stat-label">Jumlah Biaya Daftar Ulang</div>
+        <div id="ketuaBiayaUlang" class="stat-number" style="color:#7a2d6b;">0</div>
+        <div id="ketuaBiayaUlangSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Total Keuangan</div>
+        <div id="ketuaTotal" class="stat-number" style="color:#166534;">0</div>
+        <div id="ketuaTotalSub" style="margin-top:4px;font-size:12px;color:#64748b;min-height:16px;"></div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
 <div id="dashboardBendahara" style="display:none; min-height:100vh; background:#f1f5f9;">
 
   <div class="admin-container">
@@ -6858,89 +7034,52 @@ function kembaliDetailCalon() {
     </div>
 
 
-    <!-- MENU ADMIN -->
+    <!-- MENU ADMIN (dikelompokkan) -->
 
+    <h3 class="judul-menu">Pendaftaran</h3>
     <div class="menu-admin">
-
-      <button
-        type="button"
-        onclick="generateAkunDariDashboard()"
-      >
+      <button type="button" onclick="generateAkunDariDashboard()">
         🪪 Generate Akun
       </button>
-
-
-      <button
-        type="button"
-        onclick="bukaDataCalon()"
-      >
+      <button type="button" onclick="bukaDataCalon()">
         👨‍🎓 Data Calon
       </button>
-
-
-      <button
-        type="button"
-        onclick="bukaHalamanCheckIn()"
-      >
+      <button type="button" onclick="bukaHalamanCheckIn()">
         📋 Data Check-in
       </button>
-
-
-      <button
-        type="button"
-        onclick="bukaHalamanObservasi()"
-      >
-        📝 Data Observasi
-      </button>
-
-
-      <button
-        type="button"
-        onclick="bukaHalamanHasilAdmin()"
-      >
-        📊 Hasil Observasi
-      </button>
-
-
-      <button
-        type="button"
-        onclick="bukaBayarDataAdmin()"
-      >
-        💰 Data Pembayaran Daftar Ulang
-      </button>
-
-
-      <button
-        type="button"
-        onclick="bukaTidakJadiDaftar()"
-      >
+      <button type="button" onclick="bukaTidakJadiDaftar()">
         🚫 Tidak Jadi Daftar
       </button>
+    </div>
 
+    <h3 class="judul-menu">Observasi</h3>
+    <div class="menu-admin">
+      <button type="button" onclick="bukaHalamanObservasi()">
+        📝 Data Observasi
+      </button>
+      <button type="button" onclick="bukaHalamanHasilAdmin()">
+        🏆 Hasil Observasi
+      </button>
+    </div>
 
-      <button
-        type="button"
-        onclick="bukaLaporanKeuangan()"
-      >
+    <h3 class="judul-menu">Keuangan</h3>
+    <div class="menu-admin">
+      <button type="button" onclick="bukaBayarDataAdmin()">
+        💰 Data Pembayaran Daftar Ulang
+      </button>
+      <button type="button" onclick="bukaLaporanKeuangan()">
         📊 Laporan Keuangan
       </button>
+    </div>
 
-
-      <button
-        type="button"
-        onclick="bukaHalamanPengaturan()"
-      >
+    <h3 class="judul-menu">Sistem</h3>
+    <div class="menu-admin">
+      <button type="button" onclick="bukaHalamanPengaturan()">
         ⚙️ Pengaturan
       </button>
-
-
-      <button
-        type="button"
-        onclick="bukaTahunBaru()"
-      >
+      <button type="button" onclick="bukaTahunBaru()">
         🗓️ Tahun Ajaran
       </button>
-
     </div>
 
 
@@ -10572,6 +10711,89 @@ function mulaiDashboardBendahara() {
 
   tampilkanHalamanBendahara('dashboardBendahara');
   muatDataBayar();
+}
+
+
+/* ============ DASHBOARD KETUA / KEPALA SEKOLAH ============ */
+
+function mulaiDashboardKetua() {
+  const dash = document.getElementById('dashboardKetua');
+  if (dash) dash.style.display = 'block';
+
+  const nama = document.getElementById('namaKetua');
+  if (nama && window.userLogin) {
+    nama.textContent = 'Selamat datang, ' + (window.userLogin.nama || 'Pimpinan');
+  }
+
+  muatDashboardKetua();
+}
+
+function persenKetua_(bagian, total) {
+  total = Number(total) || 0;
+  if (total <= 0) return '';
+  return Math.round((Number(bagian) || 0) / total * 100) + '%';
+}
+
+function muatDashboardKetua() {
+  if (window.memuatKetua) return;
+  window.memuatKetua = true;
+
+  const tombol = document.getElementById('btnMuatKetua');
+  if (tombol) { tombol.disabled = true; tombol.textContent = '⏳ Memuat...'; }
+  tampilkanKotakPesan('pesanKetua', '', '');
+
+  function selesai() {
+    window.memuatKetua = false;
+    if (tombol) { tombol.disabled = false; tombol.textContent = '🔄 Muat Ulang'; }
+  }
+
+  function isi(id, nilai, sub) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = nilai;
+    const es = document.getElementById(id + 'Sub');
+    if (es) es.textContent = sub || '';
+  }
+
+  google.script.run
+    .withSuccessHandler(function(h) {
+      selesai();
+
+      if (!h || !h.success) {
+        tampilkanKotakPesan('pesanKetua', (h && h.message) || 'Gagal memuat data.', 'error');
+        return;
+      }
+
+      document.getElementById('ketuaTahun').textContent = h.tahunPelajaran || '-';
+      document.getElementById('ketuaDiperbarui').textContent = 'Diperbarui ' + (h.diperbarui || '');
+
+      const dari = function(n) { const p = persenKetua_(n, h.jumlahCalon); return p ? p + ' dari calon' : ''; };
+      const daftarUlang = (h.belumLunas || 0) + (h.lunas || 0) + (h.belumBayar || 0);
+      const dariUlang = function(n) { const p = persenKetua_(n, daftarUlang); return p ? p + ' dari yang diterima' : ''; };
+
+      isi('ketuaCalon', h.jumlahCalon);
+      isi('ketuaCheckIn', h.sudahCheckIn, dari(h.sudahCheckIn));
+      isi('ketuaObservasi', h.sudahObservasi, dari(h.sudahObservasi));
+      isi('ketuaDiterima', h.diterima, dari(h.diterima));
+      isi('ketuaBelumDiterima', h.belumDiterima, dari(h.belumDiterima));
+      isi('ketuaTidakDiterima', h.tidakDiterima, dari(h.tidakDiterima));
+      isi('ketuaBelumLunas', h.belumLunas, dariUlang(h.belumLunas));
+      isi('ketuaLunas', h.lunas, dariUlang(h.lunas));
+      isi('ketuaBelumBayar', h.belumBayar, dariUlang(h.belumBayar));
+      isi('ketuaTidakJadi', h.tidakJadiDaftar,
+        h.jumlahKeluarBayar
+          ? h.jumlahKeluarBayar + ' pernah membayar, total ' + formatRupiah(h.nominalTidakJadi)
+          : '');
+      isi('ketuaBiayaDaftar', formatRupiah(h.biayaPendaftaran),
+        h.jumlahCheckInBiaya + ' siswa check in × ' + formatRupiah(h.biayaPerSiswa));
+      isi('ketuaBiayaUlang', formatRupiah(h.biayaDaftarUlang),
+        h.jumlahPembayar + ' siswa sudah membayar');
+      isi('ketuaTotal', formatRupiah(h.total), 'Pendaftaran + daftar ulang');
+    })
+    .withFailureHandler(function(e) {
+      selesai();
+      tampilkanKotakPesan('pesanKetua', 'Gagal memuat data: ' + (e && e.message ? e.message : e), 'error');
+    })
+    .getDashboardKetua(window.userLogin.id);
 }
 
 
