@@ -1853,6 +1853,7 @@
 
     // nama fungsi di halaman : [action di doGet, [urutan parameter]]
     const GET_API = {
+      getDaftarTahunAjaran: ['getDaftarTahunAjaran', ['idPetugas']],
       getInfoSekolah: ['getInfoSekolah', []],
       loginUser:              ['login', ['username', 'password']],
       getStatistikAdmin:      ['getStatistikAdmin', []],
@@ -1882,6 +1883,7 @@
       simpanCheckIn:       'simpanCheckIn',
       simpanObservasi:     'simpanObservasi',
       simpanPengaturan:    'simpanPengaturan',
+      pilihTahunAjaran: 'pilihTahunAjaran',
       generateAkunPeserta: 'generateAkunPeserta',
       simpanPembayaran:    'simpanPembayaran',
       simpanPotongan:      'simpanPotongan',
@@ -2419,7 +2421,7 @@ function logout() {
   }
 
 
-  ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanHasilAdmin','halamanTidakJadi']
+  ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanTahunBaru','halamanHasilAdmin','halamanTidakJadi']
     .forEach(function(id) {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
@@ -6931,6 +6933,14 @@ function kembaliDetailCalon() {
         ⚙️ Pengaturan
       </button>
 
+
+      <button
+        type="button"
+        onclick="bukaTahunBaru()"
+      >
+        🗓️ Tahun Ajaran
+      </button>
+
     </div>
 
 
@@ -7251,6 +7261,48 @@ function kembaliDetailCalon() {
 <!-- =================================================
      HALAMAN PENGATURAN
 ================================================== -->
+
+<div id="halamanTahunBaru" style="display:none; min-height:100vh; background:#f1f5f9;">
+
+  <div class="admin-container">
+
+    <div class="admin-header">
+      <div>
+        <h2>🗓️ Tahun Ajaran</h2>
+        <p>Pilih tahun ajaran SPMB yang sedang dipakai aplikasi</p>
+      </div>
+      <button type="button" onclick="kembaliDariTahunBaru()" class="btn-logout">← Kembali</button>
+    </div>
+
+    <div class="welcome-card" style="margin-bottom:16px;">
+      <div style="font-size:13px;color:#6b7280;">Tahun ajaran aktif saat ini</div>
+      <div id="tbAktif" style="font-size:26px;font-weight:800;color:#4a1a40;">-</div>
+      <div style="margin-top:8px;font-size:13px;color:#6b7280;line-height:1.6;">
+        Setiap tahun memiliki spreadsheet sendiri. Mengganti tahun tidak menghapus data apa pun;
+        data tahun lain tetap utuh dan bisa dipilih kembali.
+      </div>
+    </div>
+
+    <div class="welcome-card" style="margin-bottom:16px;">
+      <label for="tbPilih" style="display:block;font-weight:700;margin-bottom:6px;">Pilih tahun ajaran</label>
+      <select id="tbPilih" onchange="tampilkanDetailTahun()"
+        style="width:100%;padding:13px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;font-family:inherit;background:white;">
+      </select>
+
+      <div id="tbDetail" style="margin-top:14px;font-size:14px;color:#374151;line-height:1.8;">⏳ Memuat...</div>
+    </div>
+
+    <div id="pesanTahunBaru" role="status" aria-live="polite"
+      style="display:none; margin-bottom:16px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"></div>
+
+    <button type="button" id="btnGunakanTahun" onclick="gunakanTahunTerpilih()" disabled
+      style="padding:13px 24px; border:none; border-radius:10px; background:#16a34a; color:white; font-weight:bold; font-size:15px; cursor:pointer;">
+      ✅ Gunakan Tahun Ini
+    </button>
+
+  </div>
+</div>
+
 
 <div id="halamanPengaturan" style="display:none; min-height:100vh; background:#f1f5f9;">
 
@@ -8918,6 +8970,132 @@ function bukaHalamanPengaturan() {
   muatPengaturan();
 }
 
+
+
+/* ============ TAHUN AJARAN ============ */
+
+function bukaTahunBaru() {
+  if (!adminCheckInValid()) {
+    alert('Menu ini hanya dapat dibuka oleh admin.');
+    return;
+  }
+
+  const dashboard = document.getElementById('dashboardAdmin');
+  const halaman = document.getElementById('halamanTahunBaru');
+  if (dashboard) dashboard.style.display = 'none';
+  if (halaman) halaman.style.display = 'block';
+
+  tampilkanKotakPesan('pesanTahunBaru', '', '');
+  muatDaftarTahun();
+}
+
+function kembaliDariTahunBaru() {
+  const halaman = document.getElementById('halamanTahunBaru');
+  const dashboard = document.getElementById('dashboardAdmin');
+  if (halaman) halaman.style.display = 'none';
+  if (dashboard) dashboard.style.display = 'block';
+  muatStatistikAdmin();
+  muatInfoSekolah();
+}
+
+function muatDaftarTahun(pilih) {
+  const detail = document.getElementById('tbDetail');
+  detail.textContent = '⏳ Memuat...';
+  document.getElementById('btnGunakanTahun').disabled = true;
+
+  google.script.run
+    .withSuccessHandler(function(h) {
+      if (!h || !h.success) {
+        detail.textContent = (h && h.message) || 'Gagal memuat daftar tahun.';
+        return;
+      }
+
+      window.daftarTahun = h.data || [];
+      document.getElementById('tbAktif').textContent = h.tahunAktif;
+
+      const dropdown = document.getElementById('tbPilih');
+      dropdown.innerHTML = window.daftarTahun.map(function(x) {
+        const tanda = x.aktif ? ' (aktif)' : (x.siap ? '' : ' (belum siap)');
+        return '<option value="' + escapeHtml(x.tahun) + '">' +
+          escapeHtml(x.tahun + tanda) + '</option>';
+      }).join('');
+
+      dropdown.value = pilih || h.tahunAktif;
+      tampilkanDetailTahun();
+    })
+    .withFailureHandler(function(e) {
+      detail.textContent = 'Gagal memuat daftar tahun: ' + (e && e.message ? e.message : e);
+    })
+    .getDaftarTahunAjaran(window.userLogin.id);
+}
+
+function tampilkanDetailTahun() {
+  const tahun = document.getElementById('tbPilih').value;
+  const x = (window.daftarTahun || []).filter(function(t) { return t.tahun === tahun; })[0];
+  const detail = document.getElementById('tbDetail');
+  const tombol = document.getElementById('btnGunakanTahun');
+
+  if (!x) {
+    detail.textContent = '';
+    tombol.disabled = true;
+    return;
+  }
+
+  if (!x.siap) {
+    detail.innerHTML = '⚠️ <b>Belum siap.</b> ' + escapeHtml(x.pesan || '');
+    tombol.disabled = true;
+    return;
+  }
+
+  detail.innerHTML =
+    (x.aktif ? '✅ <b>Sedang dipakai.</b><br>' : '') +
+    'Calon siswa: <b>' + Number(x.jumlah.calon) + '</b><br>' +
+    'Sudah check in: <b>' + Number(x.jumlah.checkIn) + '</b><br>' +
+    'Data pembayaran: <b>' + Number(x.jumlah.pembayaran) + '</b>';
+
+  tombol.disabled = !!x.aktif || !!window.prosesTahunBaru;
+}
+
+function gunakanTahunTerpilih() {
+  if (window.prosesTahunBaru || !adminCheckInValid()) return;
+
+  const tahun = document.getElementById('tbPilih').value;
+
+  if (!confirm(
+    'Aplikasi akan memakai data tahun ajaran ' + tahun +
+    ' untuk SEMUA pengguna.\n\nGuru, bendahara, dan calon yang sedang login ' +
+    'perlu login ulang. Lanjutkan?'
+  )) return;
+
+  window.prosesTahunBaru = true;
+  const tombol = document.getElementById('btnGunakanTahun');
+  tombol.disabled = true;
+  tombol.textContent = '⏳ Memproses...';
+  tampilkanKotakPesan('pesanTahunBaru', '', '');
+
+  function selesai() {
+    window.prosesTahunBaru = false;
+    tombol.textContent = '✅ Gunakan Tahun Ini';
+    tampilkanDetailTahun();
+  }
+
+  google.script.run
+    .withSuccessHandler(function(h) {
+      selesai();
+      if (!h || !h.success) {
+        tampilkanKotakPesan('pesanTahunBaru', (h && h.message) || 'Gagal mengganti tahun ajaran.', 'error');
+        return;
+      }
+      tampilkanKotakPesan('pesanTahunBaru', h.message, 'success');
+      muatInfoSekolah();
+      muatDaftarTahun(tahun);
+    })
+    .withFailureHandler(function(e) {
+      selesai();
+      tampilkanKotakPesan('pesanTahunBaru', 'Gagal: ' + (e && e.message ? e.message : e), 'error');
+    })
+    .pilihTahunAjaran({ idPetugas: window.userLogin.id, tahun: tahun });
+}
 
 /* Kembali ke dashboard admin */
 function kembaliDariPengaturan() {
