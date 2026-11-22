@@ -1868,6 +1868,7 @@
 
     // nama fungsi di halaman : [action di doGet, [urutan parameter]]
     const GET_API = {
+      getRiwayatPerubahan: ['getRiwayatPerubahan', ['idPetugas']],
       getDashboardKetua: ['getDashboardKetua', ['idPetugas']],
       getDaftarTahunAjaran: ['getDaftarTahunAjaran', ['idPetugas']],
       getInfoSekolah: ['getInfoSekolah', []],
@@ -2459,7 +2460,7 @@ function logout() {
   if (dashKetuaLogout) dashKetuaLogout.style.display = 'none';
 
 
-  ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanTahunBaru','halamanHasilAdmin','halamanTidakJadi']
+  ['halamanDataCalon','halamanDetailCalon','halamanKartuAkun','halamanCheckIn','halamanObservasi','halamanDetailObservasi','halamanPengaturan','halamanTahunBaru','halamanRiwayat','halamanHasilAdmin','halamanTidakJadi']
     .forEach(function(id) {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
@@ -7443,6 +7444,40 @@ function kembaliDetailCalon() {
 </div>
 
 
+<div id="halamanRiwayat" style="display:none; min-height:100vh; background:#f1f5f9;">
+
+  <div class="admin-container">
+
+    <div class="admin-header">
+      <div>
+        <h2>📜 Riwayat Perubahan</h2>
+        <p>Siapa mengubah apa dan kapan (Pengaturan, Gelombang, Tahun Ajaran)</p>
+      </div>
+      <button type="button" onclick="kembaliDariRiwayat()" class="btn-logout">← Kembali</button>
+    </div>
+
+    <div id="pesanRiwayat" role="status" aria-live="polite"
+      style="display:none; margin-bottom:16px; padding:12px; border-radius:9px; font-size:14px; line-height:1.5;"></div>
+
+    <div class="welcome-card" style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px;">Waktu</th>
+            <th style="text-align:left;padding:8px;">Petugas</th>
+            <th style="text-align:left;padding:8px;">Item</th>
+            <th style="text-align:left;padding:8px;">Sebelum</th>
+            <th style="text-align:left;padding:8px;">Sesudah</th>
+          </tr>
+        </thead>
+        <tbody id="bodyRiwayat"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
 <div id="halamanPengaturan" style="display:none; min-height:100vh; background:#f1f5f9;">
 
   <div class="admin-container">
@@ -7495,6 +7530,14 @@ function kembaliDetailCalon() {
           style="padding:13px 20px; border:none; border-radius:10px; background:#e5e7eb; color:#1f2937; font-weight:bold; font-size:15px; cursor:pointer;"
         >
           Batalkan Perubahan
+        </button>
+
+        <button
+          type="button"
+          onclick="bukaRiwayat()"
+          style="padding:13px 20px; border:none; border-radius:10px; background:#ede9fe; color:#4a1a40; font-weight:bold; font-size:15px; cursor:pointer;"
+        >
+          📜 Riwayat Perubahan
         </button>
 
       </div>
@@ -9235,6 +9278,55 @@ function gunakanTahunTerpilih() {
     })
     .pilihTahunAjaran({ idPetugas: window.userLogin.id, tahun: tahun });
 }
+
+/* ============ RIWAYAT PERUBAHAN ============ */
+
+function bukaRiwayat() {
+  if (!adminCheckInValid()) return;
+
+  document.getElementById('halamanPengaturan').style.display = 'none';
+  document.getElementById('halamanRiwayat').style.display = 'block';
+
+  const body = document.getElementById('bodyRiwayat');
+  body.innerHTML = '<tr><td colspan="5" style="padding:14px;text-align:center;">⏳ Memuat...</td></tr>';
+  tampilkanKotakPesan('pesanRiwayat', '', '');
+
+  google.script.run
+    .withSuccessHandler(function(h) {
+      if (!h || !h.success) {
+        body.innerHTML = '';
+        tampilkanKotakPesan('pesanRiwayat', (h && h.message) || 'Gagal memuat riwayat.', 'error');
+        return;
+      }
+
+      if (!h.data.length) {
+        body.innerHTML = '<tr><td colspan="5" style="padding:14px;text-align:center;color:#64748b;">Belum ada perubahan tercatat.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = h.data.map(function(r) {
+        const sel = 'padding:8px;border-top:1px solid #e5e7eb;vertical-align:top;';
+        return '<tr>' +
+          '<td style="' + sel + 'white-space:nowrap;">' + escapeHtml(r.waktu) + '</td>' +
+          '<td style="' + sel + '">' + escapeHtml(r.petugas) + '</td>' +
+          '<td style="' + sel + '"><b>' + escapeHtml(r.item) + '</b><div style="font-size:11px;color:#64748b;">' + escapeHtml(r.jenis) + '</div></td>' +
+          '<td style="' + sel + 'color:#991b1b;">' + escapeHtml(r.lama) + '</td>' +
+          '<td style="' + sel + 'color:#166534;">' + escapeHtml(r.baru) + '</td>' +
+          '</tr>';
+      }).join('');
+    })
+    .withFailureHandler(function(e) {
+      body.innerHTML = '';
+      tampilkanKotakPesan('pesanRiwayat', 'Gagal memuat riwayat: ' + (e && e.message ? e.message : e), 'error');
+    })
+    .getRiwayatPerubahan(window.userLogin.id);
+}
+
+function kembaliDariRiwayat() {
+  document.getElementById('halamanRiwayat').style.display = 'none';
+  document.getElementById('halamanPengaturan').style.display = 'block';
+}
+
 
 /* Kembali ke dashboard admin */
 function kembaliDariPengaturan() {
