@@ -1855,7 +1855,6 @@
     const GET_API = {
       getDaftarTahunAjaran: ['getDaftarTahunAjaran', ['idPetugas']],
       getInfoSekolah: ['getInfoSekolah', []],
-      loginUser:              ['login', ['username', 'password']],
       getStatistikAdmin:      ['getStatistikAdmin', []],
       getDataCalonAdmin:      ['getDataCalonAdmin', []],
       getKartuAkunAdmin:      ['getKartuAkunAdmin', ['idCalon']],
@@ -1880,6 +1879,7 @@
 
     // nama fungsi di halaman : action di doPost
     const POST_API = {
+      loginUser:           'login',
       simpanCheckIn:       'simpanCheckIn',
       simpanObservasi:     'simpanObservasi',
       simpanPengaturan:    'simpanPengaturan',
@@ -2075,7 +2075,7 @@ function prosesLogin(event) {
 
         })
 
-        .loginUser(username, password);
+        .loginUser({ username: username, password: password });
 }
 
 
