@@ -2111,6 +2111,13 @@ function infoSekolah() {
   return window.dataInfoSekolah;
 }
 
+/* Mengisi teks tahun pelajaran pada elemen statis (class tahun-info) */
+function terapkanInfoSekolah() {
+  document.querySelectorAll('.tahun-info').forEach(function(el) {
+    el.textContent = infoSekolah().tahunPelajaran;
+  });
+}
+
 function muatInfoSekolah() {
   try {
     google.script.run
@@ -2118,6 +2125,7 @@ function muatInfoSekolah() {
         if (!h || !h.success) return;
         if (h.tahunPelajaran) window.dataInfoSekolah.tahunPelajaran = h.tahunPelajaran;
         if (h.namaKepalaSekolah) window.dataInfoSekolah.namaKepalaSekolah = h.namaKepalaSekolah;
+        terapkanInfoSekolah();
       })
       .withFailureHandler(function() {})
       .getInfoSekolah();
@@ -6553,7 +6561,7 @@ function kembaliDetailCalon() {
 
       <div>
         <h2>📊 Laporan Keuangan</h2>
-        <p>SPMB Tahun Pelajaran ${escapeHtml(infoSekolah().tahunPelajaran)}</p>
+        <p>SPMB Tahun Pelajaran <span class="tahun-info">2028/2029</span></p>
       </div>
 
       <button type="button" onclick="kembaliDariLaporanKeuangan()" class="btn-logout">
@@ -6590,7 +6598,7 @@ function kembaliDetailCalon() {
     <div class="welcome-card" style="text-align:center; border:2px solid #dcbcd2; background:#f6ebf3;">
 
       <div style="font-size:15px; color:#4a1a40; font-weight:700;">
-        Total Keuangan SPMB ${escapeHtml(infoSekolah().tahunPelajaran)}
+        Total Keuangan SPMB <span class="tahun-info">2028/2029</span>
       </div>
 
       <div id="lapTotal" style="margin-top:6px; font-size:36px; font-weight:800; color:#4a1a40;">
@@ -11947,6 +11955,7 @@ function kembaliDariLaporanKeuangan() {
 
 
 function muatLaporanKeuangan() {
+  terapkanInfoSekolah();
   const lk = window.laporanKeuangan;
   if (!window.userLogin || lk.memuat) return;
 
